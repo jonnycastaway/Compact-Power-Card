@@ -84,6 +84,10 @@ class CompactPowerCard extends CompactPowerCardBase {
               {
                 name: "enable_device_power_lines",
                 selector: { boolean: { } },
+              },
+              {
+                name: "enable_pv_label_lines",
+                selector: { boolean: { } },
               },              
               {
                 name: "disable_home_gradient",
@@ -179,11 +183,20 @@ class CompactPowerCard extends CompactPowerCardBase {
                           threshold: { 
                             label: "Threshold",
                             selector: { number: { step: "any", } },
-                          },                                                                                                           
+                          },
                         },
                       },
                     },
-                  },                                          
+                  },
+                  { name: "secondary_entity",
+                    label: "Secondary Entity (optional)",
+                    selector: { entity: {} },
+                  },
+                  { name: "format",
+                    label: "Format String",
+                    selector: { text: {} },
+                    default: "{primary} W ({secondary}%)",
+                  },
                 ]
               },
               { name: "pv", 
@@ -265,11 +278,20 @@ class CompactPowerCard extends CompactPowerCardBase {
                           threshold: { 
                             label: "Threshold",
                             selector: { number: { step: "any", } },
-                          },                                                                                                           
+                          },
                         },
                       },
                     },
-                  },                                            
+                  },
+                  { name: "secondary_entity",
+                    label: "Secondary Entity (optional)",
+                    selector: { entity: {} },
+                  },
+                  { name: "format",
+                    label: "Format String",
+                    selector: { text: {} },
+                    default: "{primary} W ({secondary}%)",
+                  },
                 ]
               },  
               { name: "battery",
@@ -369,7 +391,16 @@ class CompactPowerCard extends CompactPowerCardBase {
                       threshold: { 
                         label: "Threshold",
                         selector: { number: { step: "any", } },
-                      },                                                                                                           
+                      },
+                      secondary_entity: { 
+                        label: "Secondary Entity (optional)",
+                        selector: { entity: {} },
+                      },
+                      format: { 
+                        label: "Format String",
+                        selector: { text: {} },
+                        default: "{primary} W ({secondary}%)",
+                      },
                     },
                   },
                 },
@@ -541,6 +572,8 @@ class CompactPowerCard extends CompactPowerCardBase {
     this._deviceLineFlickerTimer = null;
     this._labelFlickerStates = new Map();
     this._labelFlickerTimer = null;
+    this._pvLabelLineStates = new Map();
+    this._pvLabelLineFlickerTimer = null;
     this._trackedEntityIds = new Set();
     this._lastEntityStates = new Map();
     this._lastThemeMode = null;
@@ -1174,6 +1207,7 @@ class CompactPowerCard extends CompactPowerCardBase {
     this._adjustLayout();
     this._renderDeviceLines();
     this._logLayoutSizes();
+    this._renderPvLabelLines();
     const layoutKey = `${this._hostWidth ?? 0}x${this._hostHeight ?? 0}x${this._externalHeight ?? 0}`;
     if (layoutKey !== this._lastFlowLayoutKey) {
       this._lastFlowLayoutKey = layoutKey;
@@ -1390,6 +1424,71 @@ class CompactPowerCard extends CompactPowerCardBase {
       batteryNode,
       homeNode,
     };
+  }
+
+  _formatLabelValue(primaryVal, secondaryVal, format) {
+    if (!format) return primaryVal;
+    let primary = primaryVal;
+    let secondary = secondaryVal;
+    if (typeof primary === "number") primary = primary.toFixed(0);
+    if (typeof secondary === "number") secondary = secondary.toFixed(0);
+    return format
+      .replace("{primary}", primary)
+      .replace("{secondary}", secondary);
+  }
+
+  _renderPvLabelLines() {
+    if (!this._usePvLabelLines()) return;
+    const root = this.shadowRoot;
+    if (!root) return;
+    const group = root.getElementById("pv-label-lines");
+    if (!group) return;
+    group.innerHTML = "";
+    const pvTotal = this._getPvTotalPower();
+    if (pvTotal <= 0) return;
+    const pvConfig = this._getEntityConfig("pv");
+    const labels = pvConfig?.labels || [];
+    const pvMarker = root.querySelector(".pv-marker");
+    if (!pvMarker) return;
+    const pvRect = pvMarker.getBoundingClientRect();
+    const cardRect = root.querySelector("ha-card")?.getBoundingClientRect();
+    if (!cardRect) return;
+    const pvCenterX = pvRect.left + pvRect.width / 2 - cardRect.left;
+    const pvCenterY = pvRect.top + pvRect.height / 2 - cardRect.top;
+    const now = Date.now();
+    let nextFlickerEnd = null;
+    const ns = "http://www.w3.org/2000/svg";
+    for (const [idx, label] of labels.entries()) {
+      if (!label?.entity) continue;
+      const state = this._hass?.states?.[label.entity];
+      if (!state) continue;
+      const val = Math.abs(parseFloat(state.state) || 0);
+      if (val <= 0) continue;
+      const labelEl = root.querySelector(`.pv-label-marker[data-index="${idx}"]`);
+      if (!labelEl) continue;
+      const labelRect = labelEl.getBoundingClientRect();
+      const startX = labelRect.left + labelRect.width / 2 - cardRect.left;
+      const startY = labelRect.top + labelRect.height / 2 - cardRect.top;
+      const speed = (val / pvTotal) * 200 + 50;
+      const horizDist = Math.abs(pvCenterX - startX);
+      const vertDist = Math.abs(pvCenterY - startY);
+      const cornerRadius = Math.min(4, horizDist / 2, vertDist);
+      const dir = pvCenterX >= startX ? 1 : -1;
+      const useCurve = cornerRadius > 0 && horizDist > 0;
+      const d = useCurve
+        ? `M${startX} ${startY} V${pvCenterY - cornerRadius} Q${startX} ${pvCenterY} ${startX + dir * cornerRadius} ${pvCenterY} H${pvCenterX}`
+        : `M${startX} ${startY} V${pvCenterY} H${pvCenterX}`;
+      const path = document.createElementNS(ns, "path");
+      path.setAttribute("d", d);
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", label.color || "var(--energy-solar-color)");
+      path.setAttribute("class", "device-line");
+      path.setAttribute("stroke-width", "2");
+      path.setAttribute("stroke-linecap", "round");
+      path.setAttribute("vector-effect", "non-scaling-stroke");
+      path.style.setProperty("--device-line-opacity", "0.6");
+      group.appendChild(path);
+    }
   }
 
   _renderDeviceLines() {
@@ -1665,6 +1764,16 @@ class CompactPowerCard extends CompactPowerCardBase {
     gridLabels.forEach((lbl) => add(this._extractEntityRef(lbl?.entity)));
     batteryLabels.forEach((lbl) => add(this._extractEntityRef(lbl?.entity)));
 
+    // PV Labels secondary entities
+    const pvLabelsAll = ents.pv?.labels || [];
+    pvLabelsAll.forEach((lbl) => { if (lbl?.secondary_entity) add(lbl.secondary_entity); });
+    // Grid labels secondary entities
+    const gridLabelsAll = ents.grid?.labels || [];
+    gridLabelsAll.forEach((lbl) => { if (lbl?.secondary_entity) add(lbl.secondary_entity); });
+    // Battery labels secondary entities
+    const batLabelsAll = ents.battery_labels || [];
+    batLabelsAll.forEach((lbl) => { if (lbl?.secondary_entity) add(lbl.secondary_entity); });
+
     const batteryList = Array.isArray(ents.battery)
       ? ents.battery
       : ents.battery
@@ -1734,6 +1843,16 @@ class CompactPowerCard extends CompactPowerCardBase {
 
   _useDevicePowerLines() {
     return this._coerceBoolean(this._config?.enable_device_power_lines, false);
+  }
+
+  _usePvLabelLines() {
+    return this._coerceBoolean(this._config?.enable_pv_label_lines, false);
+  }
+
+  _getPvTotalPower() {
+    const pv = this._getEntityConfig("pv");
+    const state = this._hass?.states?.[pv?.entity];
+    return state ? Math.abs(parseFloat(state.state) || 0) : 0;
   }
 
   _allowGlowEffects() {
@@ -4061,6 +4180,7 @@ class CompactPowerCard extends CompactPowerCardBase {
           <circle id="dot-pv-home"      r="4" fill="${pvColor}" opacity="0" />
           <path id="arc-grid-battery" class="flow-line" fill="none" d="${gridBatteryPath}" />
           <g id="device-lines"></g>
+          <g id="pv-label-lines"></g>
 
           <!-- Remaining flow dots -->
           <circle id="dot-pv-grid"      r="4" fill="${pvColor}" opacity="0" />
@@ -4074,13 +4194,21 @@ class CompactPowerCard extends CompactPowerCardBase {
           <div class="overlay">
             <!-- grid voltage label removed -->
             ${pvLabelItems.map(
-              (lbl) => html`<div class="overlay-item" style="left:${lbl.leftPct}%; top:${lbl.topPct}%;">
+              (lbl) => html`<div class="overlay-item pv-label-marker" data-index="${pvLabelItems.indexOf(lbl)}" style="left:${lbl.leftPct}%; top:${lbl.topPct}%;">
                 <div class="aux-marker pv-label-marker clickable" @click=${() => this._openMoreInfo(lbl.entity || null)}>
                 <ha-icon icon="${lbl.icon}" style="gap: 0px; color:${lbl.color}; opacity:1; --mdc-icon-size: calc(18px * var(--cpc-scale, 1)); filter:${allowGlow && lbl.numeric !== 0 ? `drop-shadow(0 0 8px ${lbl.color})` : "none"};"></ha-icon>
                   <div class="aux-label" style="margin-top: -6px; padding-bottom: 0px; color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity};">${renderValue(lbl.val)}</div>
                   ${showPvLabelNames && lbl.name
                     ? html`<div class="aux-sub-label" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity};">${lbl.name}</div>`
                     : ""}
+                  ${lbl.secondary_entity && this._hass?.states?.[lbl.secondary_entity] && (() => {
+                    const secState = this._hass.states[lbl.secondary_entity];
+                    const secVal = parseFloat(secState?.state) || 0;
+                    const primState = this._hass.states[lbl.entity];
+                    const primVal = parseFloat(primState?.state) || 0;
+                    const fmt = lbl.format || "{primary} W ({secondary}%)";
+                    return html`<div class="aux-sub-label" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity};">${this._formatLabelValue(primVal, secVal, fmt)}</div>`;
+                  })()}
                 </div>
               </div>`
             )}
@@ -4089,6 +4217,14 @@ class CompactPowerCard extends CompactPowerCardBase {
                 <div class="aux-marker clickable" style="flex-direction: row; gap: 4px;" @click=${() => this._openMoreInfo(lbl.entity || null)}>
                   <ha-icon icon="${lbl.icon}" style="color:${lbl.color}; opacity:1; --mdc-icon-size: calc(16px * var(--cpc-scale, 1)); filter:${allowGlow && lbl.numeric !== 0 ? `drop-shadow(0 0 8px ${lbl.color})` : "none"};"></ha-icon>
                   <div class="aux-label" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity};">${renderValue(lbl.val)}</div>
+                  ${lbl.secondary_entity && this._hass?.states?.[lbl.secondary_entity] && (() => {
+                    const secState = this._hass.states[lbl.secondary_entity];
+                    const secVal = parseFloat(secState?.state) || 0;
+                    const primState = this._hass.states[lbl.entity];
+                    const primVal = parseFloat(primState?.state) || 0;
+                    const fmt = lbl.format || "{primary} W ({secondary}%)";
+                    return html`<div class="aux-sub-label" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity};">${this._formatLabelValue(primVal, secVal, fmt)}</div>`;
+                  })()}
                 </div>
               </div>`
             )}
@@ -4098,6 +4234,14 @@ class CompactPowerCard extends CompactPowerCardBase {
                     <div class="aux-marker clickable" style="flex-direction: row; gap: 4px;" @click=${() => this._openMoreInfo(lbl.entity || null)}>
                       <div class="aux-label" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity};">${renderValue(lbl.val)}</div>
                       <ha-icon icon="${lbl.icon}" style="color:${lbl.color}; opacity:1; --mdc-icon-size: calc(16px * var(--cpc-scale, 1)); filter:${allowGlow && lbl.numeric !== 0 ? `drop-shadow(0 0 8px ${lbl.color})` : "none"};"></ha-icon>
+                      ${lbl.secondary_entity && this._hass?.states?.[lbl.secondary_entity] && (() => {
+                        const secState = this._hass.states[lbl.secondary_entity];
+                        const secVal = parseFloat(secState?.state) || 0;
+                        const primState = this._hass.states[lbl.entity];
+                        const primVal = parseFloat(primState?.state) || 0;
+                        const fmt = lbl.format || "{primary} W ({secondary}%)";
+                        return html`<div class="aux-sub-label" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity};">${this._formatLabelValue(primVal, secVal, fmt)}</div>`;
+                      })()}
                     </div>
                   </div>`
                 )
