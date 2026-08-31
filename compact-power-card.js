@@ -1469,15 +1469,17 @@ class CompactPowerCard extends CompactPowerCardBase {
       const labelRect = labelEl.getBoundingClientRect();
       const startX = labelRect.left + labelRect.width / 2 - cardRect.left;
       const startY = labelRect.top + labelRect.height / 2 - cardRect.top;
-      const speed = (val / pvTotal) * 200 + 50;
+      // Like device lines: go down first, then curve to PV center
+      const downY = startY + 12;  // go down a bit first (below label)
+      const upY = startY + 6;     // then up a bit for the curve
       const horizDist = Math.abs(pvCenterX - startX);
-      const vertDist = Math.abs(pvCenterY - startY);
-      const cornerRadius = Math.min(4, horizDist / 2, vertDist);
+      const vertDist = Math.abs(downY - upY);
+      const cornerRadius = Math.min(6, horizDist / 2, vertDist);
       const dir = pvCenterX >= startX ? 1 : -1;
       const useCurve = cornerRadius > 0 && horizDist > 0;
       const d = useCurve
-        ? `M${startX} ${startY} V${pvCenterY - cornerRadius} Q${startX} ${pvCenterY} ${startX + dir * cornerRadius} ${pvCenterY} H${pvCenterX}`
-        : `M${startX} ${startY} V${pvCenterY} H${pvCenterX}`;
+        ? `M${startX} ${startY} V${downY - cornerRadius} Q${startX} ${downY} ${startX + dir * cornerRadius} ${downY} H${pvCenterX}`
+        : `M${startX} ${startY} V${downY} H${pvCenterX}`;
       const path = document.createElementNS(ns, "path");
       path.setAttribute("d", d);
       path.setAttribute("fill", "none");
