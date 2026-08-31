@@ -3890,6 +3890,8 @@ class CompactPowerCard extends CompactPowerCardBase {
         xPct: pos.xPct,
         yPx: pos.yPx,
         numeric: hasNumeric ? (isPowerEntity ? numericW : numeric) : 0,
+        secondary_entity: lbl.secondary_entity || null,
+        format: lbl.format || "{primary} W ({secondary}%)",
       };
     });
 
@@ -3947,6 +3949,8 @@ class CompactPowerCard extends CompactPowerCardBase {
         xPct: pos.xPct,
         yPx: pos.yPx,
         numeric: hasNumeric ? (isPowerEntity ? numericW : numeric) : 0,
+        secondary_entity: lbl.secondary_entity || null,
+        format: lbl.format || "{primary} W ({secondary}%)",
       };
     });
 
