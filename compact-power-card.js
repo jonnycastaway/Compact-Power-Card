@@ -279,19 +279,19 @@ class CompactPowerCard extends CompactPowerCardBase {
                             label: "Threshold",
                             selector: { number: { step: "any", } },
                           },
+                          secondary_entity: { 
+                            label: "Secondary Entity (optional)",
+                            selector: { entity: {} },
+                          },
+                          format: { 
+                            label: "Format String",
+                            selector: { text: {} },
+                            default: "{primary} W ({secondary}%)",
+                          },
                         },
                       },
                     },
-                  },
-                  { name: "secondary_entity",
-                    label: "Secondary Entity (optional)",
-                    selector: { entity: {} },
-                  },
-                  { name: "format",
-                    label: "Format String",
-                    selector: { text: {} },
-                    default: "{primary} W ({secondary}%)",
-                  },
+                  },                                            
                 ]
               },  
               { name: "battery",
@@ -1470,11 +1470,11 @@ class CompactPowerCard extends CompactPowerCardBase {
       const startX = labelRect.left + labelRect.width / 2 - cardRect.left;
       const startY = labelRect.top + labelRect.height / 2 - cardRect.top;
       // Like device lines: go down first, then curve to PV center
-      const downY = startY + 12;  // go down a bit first (below label)
-      const upY = startY + 6;     // then up a bit for the curve
+      const downY = startY + 24;  // go down below label (icon + text)
+      const upY = startY + 12;    // then up a bit for curve
       const horizDist = Math.abs(pvCenterX - startX);
       const vertDist = Math.abs(downY - upY);
-      const cornerRadius = Math.min(6, horizDist / 2, vertDist);
+      const cornerRadius = Math.min(8, horizDist / 2, vertDist);
       const dir = pvCenterX >= startX ? 1 : -1;
       const useCurve = cornerRadius > 0 && horizDist > 0;
       const d = useCurve
