@@ -4040,6 +4040,8 @@ class CompactPowerCard extends CompactPowerCardBase {
           leftPct,
           topPct: yPct,
           numeric: hasNumeric ? (isPowerEntity ? numericW : numeric) : 0,
+          secondary_entity: lbl.secondary_entity || null,
+          format: lbl.format || "{primary} W ({secondary}%)",
         };
       });
 
