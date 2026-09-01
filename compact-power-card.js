@@ -1033,6 +1033,15 @@ class CompactPowerCard extends CompactPowerCardBase {
         line-height: 1;
       }
 
+      .aux-sub-label.label-secondary {
+        margin-top: 4px;
+      }
+
+      .aux-sub-label.label-name {
+        margin-top: 4px;
+        font-weight: 400;
+      }
+
       .pv-label-marker .aux-sub-label {
         position: absolute;
         top: 100%;
@@ -1464,7 +1473,7 @@ class CompactPowerCard extends CompactPowerCardBase {
       if (!state) continue;
       const val = Math.abs(parseFloat(state.state) || 0);
       if (val <= 0) continue;
-      const labelEl = root.querySelector(`.pv-label-marker[data-index="${idx}"]`);
+      const labelEl = root.querySelector(`.overlay-item.pv-label-marker[data-index="${idx}"]`);
       if (!labelEl) continue;
       // Use icon position (above text/name)
       const iconEl = labelEl.querySelector("ha-icon");
@@ -4214,10 +4223,10 @@ class CompactPowerCard extends CompactPowerCardBase {
                     const primState = this._hass.states[lbl.entity];
                     const primVal = parseFloat(primState?.state) || 0;
                     const fmt = lbl.format || "{primary} W ({secondary}%)";
-                    return html`<div class="aux-sub-label" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); margin-top:2px;">${this._formatLabelValue(primVal, secVal, fmt)}</div>`;
+                    return html`<div class="aux-sub-label label-secondary" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); margin-top:4px;">${this._formatLabelValue(primVal, secVal, fmt)}</div>`;
                   })()}
                   ${showPvLabelNames && lbl.name
-                    ? html`<div class="aux-sub-label" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); margin-top:2px;">${lbl.name}</div>`
+                    ? html`<div class="aux-sub-label label-name" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); margin-top:4px;">${lbl.name}</div>`
                     : ""}
                 </div>
               </div>`
@@ -4233,7 +4242,7 @@ class CompactPowerCard extends CompactPowerCardBase {
                     const primState = this._hass.states[lbl.entity];
                     const primVal = parseFloat(primState?.state) || 0;
                     const fmt = lbl.format || "{primary} W ({secondary}%)";
-                    return html`<div class="aux-sub-label" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); margin-top:2px;">${this._formatLabelValue(primVal, secVal, fmt)}</div>`;
+                    return html`<div class="aux-sub-label label-secondary" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); margin-top:4px;">${this._formatLabelValue(primVal, secVal, fmt)}</div>`;
                   })()}
                 </div>
               </div>`
@@ -4249,7 +4258,7 @@ class CompactPowerCard extends CompactPowerCardBase {
                         const primState = this._hass.states[lbl.entity];
                         const primVal = parseFloat(primState?.state) || 0;
                         const fmt = lbl.format || "{primary} W ({secondary}%)";
-                        return html`<div class="aux-sub-label" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); margin-top:2px;">${this._formatLabelValue(primVal, secVal, fmt)}</div>`;
+                        return html`<div class="aux-sub-label label-secondary" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); margin-top:4px;">${this._formatLabelValue(primVal, secVal, fmt)}</div>`;
                       })()}
                       <ha-icon icon="${lbl.icon}" style="color:${lbl.color}; opacity:1; --mdc-icon-size: calc(16px * var(--cpc-scale, 1)); filter:${allowGlow && lbl.numeric !== 0 ? `drop-shadow(0 0 8px ${lbl.color})` : "none"};"></ha-icon>
                     </div>
