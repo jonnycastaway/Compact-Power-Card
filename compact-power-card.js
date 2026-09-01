@@ -1466,11 +1466,14 @@ class CompactPowerCard extends CompactPowerCardBase {
       if (val <= 0) continue;
       const labelEl = root.querySelector(`.pv-label-marker[data-index="${idx}"]`);
       if (!labelEl) continue;
-      const labelRect = labelEl.getBoundingClientRect();
-      const startX = labelRect.left + labelRect.width / 2 - cardRect.left;
-      const startY = labelRect.top + labelRect.height / 2 - cardRect.top;
-      // Like device lines: go down first, then curve to PV center
-      const downY = startY + 24;  // go down below label (icon + text)
+      // Use icon position (above text/name)
+      const iconEl = labelEl.querySelector("ha-icon");
+      if (!iconEl) continue;
+      const iconRect = iconEl.getBoundingClientRect();
+      const startX = iconRect.left + iconRect.width / 2 - cardRect.left;
+      const startY = iconRect.top + iconRect.height / 2 - cardRect.top;
+      // Like device lines: go down first from icon, then curve to PV center
+      const downY = startY + 24;  // go down from icon
       const upY = startY + 12;    // then up a bit for curve
       const horizDist = Math.abs(pvCenterX - startX);
       const vertDist = Math.abs(downY - upY);
