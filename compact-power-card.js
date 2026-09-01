@@ -4207,17 +4207,17 @@ class CompactPowerCard extends CompactPowerCardBase {
               (lbl) => html`<div class="overlay-item pv-label-marker" data-index="${pvLabelItems.indexOf(lbl)}" style="left:${lbl.leftPct}%; top:${lbl.topPct}%;">
                 <div class="aux-marker pv-label-marker clickable" @click=${() => this._openMoreInfo(lbl.entity || null)}>
                 <ha-icon icon="${lbl.icon}" style="gap: 0px; color:${lbl.color}; opacity:1; --mdc-icon-size: calc(18px * var(--cpc-scale, 1)); filter:${allowGlow && lbl.numeric !== 0 ? `drop-shadow(0 0 8px ${lbl.color})` : "none"};"></ha-icon>
+                  <div class="aux-label" style="margin-top: -6px; padding-bottom: 0px; color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity};">${renderValue(lbl.val)}</div>
                   ${lbl.secondary_entity && this._hass?.states?.[lbl.secondary_entity] && (() => {
                     const secState = this._hass.states[lbl.secondary_entity];
                     const secVal = parseFloat(secState?.state) || 0;
                     const primState = this._hass.states[lbl.entity];
                     const primVal = parseFloat(primState?.state) || 0;
                     const fmt = lbl.format || "{primary} W ({secondary}%)";
-                    return html`<div class="aux-sub-label" style="position:absolute; bottom:100%; left:50%; transform:translateX(-50%); white-space:nowrap; margin-bottom:2px; color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); top:auto;">${this._formatLabelValue(primVal, secVal, fmt)}</div>`;
+                    return html`<div class="aux-sub-label" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); margin-top:2px;">${this._formatLabelValue(primVal, secVal, fmt)}</div>`;
                   })()}
-                  <div class="aux-label" style="margin-top: -6px; padding-bottom: 0px; color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity};">${renderValue(lbl.val)}</div>
                   ${showPvLabelNames && lbl.name
-                    ? html`<div class="aux-sub-label" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity};">${lbl.name}</div>`
+                    ? html`<div class="aux-sub-label" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); margin-top:2px;">${lbl.name}</div>`
                     : ""}
                 </div>
               </div>`
@@ -4226,15 +4226,15 @@ class CompactPowerCard extends CompactPowerCardBase {
               (lbl) => html`<div class="overlay-item anchor-left" style="left:${lbl.xPct}%; top:${lbl.yPx}px;">
                 <div class="aux-marker clickable" style="flex-direction: row; gap: 4px;" @click=${() => this._openMoreInfo(lbl.entity || null)}>
                   <ha-icon icon="${lbl.icon}" style="color:${lbl.color}; opacity:1; --mdc-icon-size: calc(16px * var(--cpc-scale, 1)); filter:${allowGlow && lbl.numeric !== 0 ? `drop-shadow(0 0 8px ${lbl.color})` : "none"};"></ha-icon>
+                  <div class="aux-label" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity};">${renderValue(lbl.val)}</div>
                   ${lbl.secondary_entity && this._hass?.states?.[lbl.secondary_entity] && (() => {
                     const secState = this._hass.states[lbl.secondary_entity];
                     const secVal = parseFloat(secState?.state) || 0;
                     const primState = this._hass.states[lbl.entity];
                     const primVal = parseFloat(primState?.state) || 0;
                     const fmt = lbl.format || "{primary} W ({secondary}%)";
-                    return html`<div class="aux-sub-label" style="position:absolute; bottom:100%; left:50%; transform:translateX(-50%); white-space:nowrap; margin-bottom:2px; color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); top:auto;">${this._formatLabelValue(primVal, secVal, fmt)}</div>`;
+                    return html`<div class="aux-sub-label" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); margin-top:2px;">${this._formatLabelValue(primVal, secVal, fmt)}</div>`;
                   })()}
-                  <div class="aux-label" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity};">${renderValue(lbl.val)}</div>
                 </div>
               </div>`
             )}
@@ -4242,15 +4242,15 @@ class CompactPowerCard extends CompactPowerCardBase {
               ? batteryLabelItems.map(
                   (lbl) => html`<div class="overlay-item anchor-right battery-label" style="margin-right: 10px; left:${lbl.xPct}%; top:${lbl.yPx}px;">
                     <div class="aux-marker clickable" style="flex-direction: row; gap: 4px;" @click=${() => this._openMoreInfo(lbl.entity || null)}>
+                      <div class="aux-label" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity};">${renderValue(lbl.val)}</div>
                       ${lbl.secondary_entity && this._hass?.states?.[lbl.secondary_entity] && (() => {
                         const secState = this._hass.states[lbl.secondary_entity];
                         const secVal = parseFloat(secState?.state) || 0;
                         const primState = this._hass.states[lbl.entity];
                         const primVal = parseFloat(primState?.state) || 0;
                         const fmt = lbl.format || "{primary} W ({secondary}%)";
-                        return html`<div class="aux-sub-label" style="position:absolute; bottom:100%; right:0; transform:translateX(0); white-space:nowrap; margin-bottom:2px; color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); top:auto;">${this._formatLabelValue(primVal, secVal, fmt)}</div>`;
+                        return html`<div class="aux-sub-label" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); margin-top:2px;">${this._formatLabelValue(primVal, secVal, fmt)}</div>`;
                       })()}
-                      <div class="aux-label" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity};">${renderValue(lbl.val)}</div>
                       <ha-icon icon="${lbl.icon}" style="color:${lbl.color}; opacity:1; --mdc-icon-size: calc(16px * var(--cpc-scale, 1)); filter:${allowGlow && lbl.numeric !== 0 ? `drop-shadow(0 0 8px ${lbl.color})` : "none"};"></ha-icon>
                     </div>
                   </div>`
