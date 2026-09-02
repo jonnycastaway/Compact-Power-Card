@@ -3862,7 +3862,7 @@ class CompactPowerCard extends CompactPowerCardBase {
       56 * (baseWidth / designWidth)
     );
     const pvLabelCap = Math.max(4, maxItemsByColumns);
-    const pvLabelY = 42;  // moved down to make room for labels
+    const pvLabelY = 50;  // moved down more for label space
 
     const gridIconTop = gridNodeY + 9;
     const batteryIconTop = gridNodeY + 9;
@@ -4281,7 +4281,7 @@ class CompactPowerCard extends CompactPowerCardBase {
                 )
               : ""}
             ${!pvInBatterySlot
-              ? html`<div class="overlay-item pv-section pv-section-top" style="left:${(sx(256)/baseWidth)*100}%; top:${pctBaseY(24)}%;">
+              ? html`<div class="overlay-item pv-section pv-section-top" style="left:${(sx(256)/baseWidth)*100}%; top:${pctBaseY(32)}%;">
                   <div class="node-marker pv-marker clickable" @click=${() => this._handleTapAction(pvCfg, pvCfg.entity)}>
                     ${pvInBatterySlot
                       ? ""
@@ -4302,11 +4302,9 @@ class CompactPowerCard extends CompactPowerCardBase {
                   </div>
                 </div>`
               : ""}
-            ${pvNumeric !== 0
-              ? html`<div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(pvNodeY)}%;">
-                  <div class="pv-power-dot active" style="color:${pvColor};"></div>
-                </div>`
-              : ""}
+            <div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(pvNodeY)}%;">
+                <div class="pv-power-dot" style="color:${pvColor};"></div>
+              </div>
             ${pvInBatterySlot
               ? html`<div class="overlay-item anchor-right pv-section pv-section-battery" style="left:${((batteryIconX + 6)/baseWidth)*100}%; top:${batteryIconTop + 3}px;">
                   <div class="node-marker pv-marker right clickable" @click=${() => this._handleTapAction(pvCfg, pvCfg.entity)}>
