@@ -1498,8 +1498,8 @@ class CompactPowerCard extends CompactPowerCardBase {
       const startX = iconRect.left + iconRect.width / 2 - cardRect.left;
       const startY = iconRect.top + iconRect.height / 2 - cardRect.top;
       // Arc OVER the top: short vertical up, then curve, then horizontal (like device lines)
-      const upY = startY - 6;     // even shorter vertical up from icon
-      const peakY = upY - 6;      // small peak
+      const upY = startY - 6;
+      const peakY = upY - 6;
       const horizDist = Math.abs(pvCenterX - startX);
       const cornerRadius = Math.min(5, horizDist / 2);
       const dir = pvCenterX >= startX ? 1 : -1;
@@ -1515,7 +1515,12 @@ class CompactPowerCard extends CompactPowerCardBase {
       path.setAttribute("stroke-width", "2");
       path.setAttribute("stroke-linecap", "round");
       path.setAttribute("vector-effect", "non-scaling-stroke");
-      path.style.setProperty("--device-line-opacity", "0.6");
+      // Opacity based on label value (like device lines): 0.4 at 0W or below threshold, 1 otherwise
+      const labelState = this._hass?.states?.[label.entity];
+      const labelVal = labelState ? Math.abs(parseFloat(labelState.state) || 0) : 0;
+      const labelThreshold = label.threshold ? parseFloat(label.threshold) : null;
+      const lineOpacity = (labelVal === 0 || (labelThreshold != null && labelVal < labelThreshold)) ? 0.4 : 1;
+      path.style.setProperty("--device-line-opacity", String(lineOpacity));
       group.appendChild(path);
     }
   }
@@ -4304,7 +4309,7 @@ class CompactPowerCard extends CompactPowerCardBase {
                 </div>`
               : ""}
             <div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(pvNodeY)}%; z-index: 20;">
-                <div class="pv-power-dot" style="color:${pvColor}; display: block; width: calc(8px * var(--cpc-scale, 1)); height: calc(8px * var(--cpc-scale, 1)); border-radius: 50%; background: ${pvColor};"></div>
+                <div class="pv-power-dot" style="display: block; width: calc(8px * var(--cpc-scale, 1)); height: calc(8px * var(--cpc-scale, 1)); border-radius: 50%; background: ${pvColor};"></div>
               </div>
             ${pvInBatterySlot
               ? html`<div class="overlay-item anchor-right pv-section pv-section-battery" style="left:${((batteryIconX + 6)/baseWidth)*100}%; top:${batteryIconTop + 3}px;">
