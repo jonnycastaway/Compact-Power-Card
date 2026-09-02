@@ -992,6 +992,7 @@ class CompactPowerCard extends CompactPowerCardBase {
         border-radius: 999px;
         background: currentColor;
         opacity: 1;
+        z-index: 10;
       }
 
       .pv-power-dot.active {
@@ -1050,11 +1051,11 @@ class CompactPowerCard extends CompactPowerCardBase {
       }
 
       .aux-sub-label.label-secondary {
-        margin-top: 4px;
+        margin-top: 2px;
       }
 
       .aux-sub-label.label-name {
-        margin-top: 4px;
+        margin-top: 2px;
         font-weight: 400;
       }
 
@@ -1363,7 +1364,7 @@ class CompactPowerCard extends CompactPowerCardBase {
     const syGridBatt = (v) => (v + yOffset) * yScale; // scale mid rows with height
     const homeCenterX = baseWidth / 2;
     const pvCenterX = homeCenterX;
-    const pvNodeY = sy(52);
+    const pvNodeY = sy(38);  // higher up, symmetric to device line from bottom
     const homeAnchorY = syHome(131);
     const homeLineEndY = Math.max(0, homeAnchorY - 6);
     const gridLineStartX = 35; // fixed distance from left
@@ -4302,8 +4303,8 @@ class CompactPowerCard extends CompactPowerCardBase {
                   </div>
                 </div>`
               : ""}
-            <div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(pvNodeY)}%;">
-                <div class="pv-power-dot" style="color:${pvColor};"></div>
+            <div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(pvNodeY)}%; z-index: 20;">
+                <div class="pv-power-dot" style="color:${pvColor}; display: block; width: calc(8px * var(--cpc-scale, 1)); height: calc(8px * var(--cpc-scale, 1)); border-radius: 50%; background: ${pvColor};"></div>
               </div>
             ${pvInBatterySlot
               ? html`<div class="overlay-item anchor-right pv-section pv-section-battery" style="left:${((batteryIconX + 6)/baseWidth)*100}%; top:${batteryIconTop + 3}px;">
