@@ -982,6 +982,22 @@ class CompactPowerCard extends CompactPowerCardBase {
         pointer-events: none;
       }
 
+      .pv-power-dot-wrapper {
+        pointer-events: none;
+      }
+
+      .pv-power-dot {
+        width: calc(8px * var(--cpc-scale, 1));
+        height: calc(8px * var(--cpc-scale, 1));
+        border-radius: 999px;
+        background: currentColor;
+        opacity: 1;
+      }
+
+      .pv-power-dot.active {
+        animation: cpc-pulse 1.4s ease-in-out infinite;
+      }
+
       @keyframes cpc-pulse {
         0% {
           transform: scale(0.85);
