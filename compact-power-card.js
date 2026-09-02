@@ -1497,10 +1497,10 @@ class CompactPowerCard extends CompactPowerCardBase {
       const startX = iconRect.left + iconRect.width / 2 - cardRect.left;
       const startY = iconRect.top + iconRect.height / 2 - cardRect.top;
       // Arc OVER the top: short vertical up, then curve, then horizontal (like device lines)
-      const upY = startY - 8;     // short vertical up from icon
-      const peakY = upY - 8;      // small peak
+      const upY = startY - 6;     // even shorter vertical up from icon
+      const peakY = upY - 6;      // small peak
       const horizDist = Math.abs(pvCenterX - startX);
-      const cornerRadius = Math.min(6, horizDist / 2);
+      const cornerRadius = Math.min(5, horizDist / 2);
       const dir = pvCenterX >= startX ? 1 : -1;
       const useCurve = cornerRadius > 0 && horizDist > 0;
       const d = useCurve
@@ -4300,6 +4300,11 @@ class CompactPowerCard extends CompactPowerCardBase {
                         </div>`
                       : html`<ha-icon icon="${pvIconId}" style="color:${pvColor}; opacity:${pvInBatterySlot ? 0.5 : 1}; filter:${allowGlow && pvNumeric !== 0 ? `drop-shadow(0 0 10px ${pvColor})` : "none"};"></ha-icon>`}
                   </div>
+                </div>`
+              : ""}
+            ${pvNumeric !== 0
+              ? html`<div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(pvNodeY)}%;">
+                  <div class="pv-power-dot active" style="color:${pvColor};"></div>
                 </div>`
               : ""}
             ${pvInBatterySlot
