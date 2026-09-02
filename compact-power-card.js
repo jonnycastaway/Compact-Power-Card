@@ -1042,13 +1042,12 @@ class CompactPowerCard extends CompactPowerCardBase {
         font-weight: 400;
       }
 
-      .pv-label-marker .aux-sub-label {
-        position: absolute;
-        top: 100%;
-        left: 50%;
-        transform: translateX(-50%);
-        margin-top: -4px;
-        white-space: nowrap;
+      .pv-label-marker .aux-sub-label.label-name {
+        margin-top: 4px;
+        font-weight: 400;
+      }
+      .pv-label-marker .aux-sub-label.label-secondary {
+        margin-top: 4px;
       }
 
       .device-name {
@@ -1481,11 +1480,11 @@ class CompactPowerCard extends CompactPowerCardBase {
       const iconRect = iconEl.getBoundingClientRect();
       const startX = iconRect.left + iconRect.width / 2 - cardRect.left;
       const startY = iconRect.top + iconRect.height / 2 - cardRect.top;
-      // Arc OVER the top: start ABOVE icon, curve up then horizontal to PV center
-      const upY = startY - 16;    // start above icon
-      const peakY = upY - 12;     // peak of arc
+      // Arc OVER the top: short vertical up, then curve, then horizontal (like device lines)
+      const upY = startY - 8;     // short vertical up from icon
+      const peakY = upY - 8;      // small peak
       const horizDist = Math.abs(pvCenterX - startX);
-      const cornerRadius = Math.min(10, horizDist / 2);
+      const cornerRadius = Math.min(6, horizDist / 2);
       const dir = pvCenterX >= startX ? 1 : -1;
       const useCurve = cornerRadius > 0 && horizDist > 0;
       const d = useCurve
@@ -3847,7 +3846,7 @@ class CompactPowerCard extends CompactPowerCardBase {
       56 * (baseWidth / designWidth)
     );
     const pvLabelCap = Math.max(4, maxItemsByColumns);
-    const pvLabelY = 28;
+    const pvLabelY = 42;  // moved down to make room for labels
 
     const gridIconTop = gridNodeY + 9;
     const batteryIconTop = gridNodeY + 9;
