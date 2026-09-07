@@ -1060,11 +1060,11 @@ class CompactPowerCard extends CompactPowerCardBase {
       }
 
       .pv-label-marker .aux-sub-label.label-name {
-        margin-top: 4px;
+        margin-top: 2px;
         font-weight: 400;
       }
       .pv-label-marker .aux-sub-label.label-secondary {
-        margin-top: 4px;
+        margin-top: 2px;
       }
 
       .device-name {
@@ -4244,10 +4244,10 @@ class CompactPowerCard extends CompactPowerCardBase {
                     const primState = this._hass.states[lbl.entity];
                     const primVal = parseFloat(primState?.state) || 0;
                     const fmt = lbl.format || "{primary} W ({secondary}%)";
-                    return html`<div class="aux-sub-label label-secondary" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); margin-top:4px;">${this._formatLabelValue(primVal, secVal, fmt)}</div>`;
+                    return html`<div class="aux-sub-label label-secondary" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); ">${this._formatLabelValue(primVal, secVal, fmt)}</div>`;
                   })()}
                   ${showPvLabelNames && lbl.name
-                    ? html`<div class="aux-sub-label label-name" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); margin-top:4px;">${lbl.name}</div>`
+                    ? html`<div class="aux-sub-label label-name" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); ">${lbl.name}</div>`
                     : ""}
                 </div>
               </div>`
@@ -4263,7 +4263,7 @@ class CompactPowerCard extends CompactPowerCardBase {
                     const primState = this._hass.states[lbl.entity];
                     const primVal = parseFloat(primState?.state) || 0;
                     const fmt = lbl.format || "{primary} W ({secondary}%)";
-                    return html`<div class="aux-sub-label label-secondary" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); margin-top:4px;">${this._formatLabelValue(primVal, secVal, fmt)}</div>`;
+                    return html`<div class="aux-sub-label label-secondary" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); ">${this._formatLabelValue(primVal, secVal, fmt)}</div>`;
                   })()}
                 </div>
               </div>`
@@ -4279,7 +4279,7 @@ class CompactPowerCard extends CompactPowerCardBase {
                         const primState = this._hass.states[lbl.entity];
                         const primVal = parseFloat(primState?.state) || 0;
                         const fmt = lbl.format || "{primary} W ({secondary}%)";
-                        return html`<div class="aux-sub-label label-secondary" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); margin-top:4px;">${this._formatLabelValue(primVal, secVal, fmt)}</div>`;
+                        return html`<div class="aux-sub-label label-secondary" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); ">${this._formatLabelValue(primVal, secVal, fmt)}</div>`;
                       })()}
                       <ha-icon icon="${lbl.icon}" style="color:${lbl.color}; opacity:1; --mdc-icon-size: calc(16px * var(--cpc-scale, 1)); filter:${allowGlow && lbl.numeric !== 0 ? `drop-shadow(0 0 8px ${lbl.color})` : "none"};"></ha-icon>
                     </div>
