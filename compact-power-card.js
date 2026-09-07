@@ -1496,7 +1496,6 @@ class CompactPowerCard extends CompactPowerCardBase {
       const state = this._hass?.states?.[label.entity];
       if (!state) continue;
       const val = Math.abs(parseFloat(state.state) || 0);
-      if (val <= 0) continue;
       const labelEl = root.querySelector(`.overlay-item.pv-label-marker[data-index="${idx}"]`);
       if (!labelEl) continue;
       // Use icon position (above text/name)
@@ -1507,7 +1506,7 @@ class CompactPowerCard extends CompactPowerCardBase {
       const startY = iconRect.top + iconRect.height / 2 - cardRect.top;
       // Arc OVER the top: horizontal line ABOVE the PV value (at pctBaseY(32)%)
       const upY = startY - 6;
-      const peakY = Math.min(upY - 6, pvNodeY - 22);  // well above the PV value at pctBaseY(32)%
+      const peakY = Math.min(upY - 6, pvNodeY - 32);  // half distance to top edge
       const horizDist = Math.abs(pvCenterX - startX);
       const cornerRadius = Math.min(5, horizDist / 2);
       const dir = pvCenterX >= startX ? 1 : -1;
@@ -4315,7 +4314,7 @@ class CompactPowerCard extends CompactPowerCardBase {
                   </div>
                 </div>`
               : ""}
-            <div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(pvNodeY - 24)}%; z-index: 20;">
+            <div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(pvNodeY - 34)}%; z-index: 20;">
                 <div class="pv-power-dot" style="display: block; width: calc(8px * var(--cpc-scale, 1)); height: calc(8px * var(--cpc-scale, 1)); border-radius: 50%; background: ${pvColor};"></div>
               </div>
             ${pvInBatterySlot
