@@ -1505,9 +1505,9 @@ class CompactPowerCard extends CompactPowerCardBase {
       const iconRect = iconEl.getBoundingClientRect();
       const startX = iconRect.left + iconRect.width / 2 - cardRect.left;
       const startY = iconRect.top + iconRect.height / 2 - cardRect.top;
-      // Arc OVER the top: short vertical up, then curve, then horizontal (like device lines)
+      // Arc OVER the top: horizontal line above the PV symbol (not inside it)
       const upY = startY - 6;
-      const peakY = upY - 6;
+      const peakY = Math.min(upY - 6, pvNodeY - 16);  // above the PV symbol
       const horizDist = Math.abs(pvCenterX - startX);
       const cornerRadius = Math.min(5, horizDist / 2);
       const dir = pvCenterX >= startX ? 1 : -1;
@@ -4316,7 +4316,7 @@ class CompactPowerCard extends CompactPowerCardBase {
                   </div>
                 </div>`
               : ""}
-            <div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(pvNodeY - 12)}%; z-index: 20;">
+            <div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(pvNodeY - 18)}%; z-index: 20;">
                 <div class="pv-power-dot" style="display: block; width: calc(8px * var(--cpc-scale, 1)); height: calc(8px * var(--cpc-scale, 1)); border-radius: 50%; background: ${pvColor};"></div>
               </div>
             ${pvInBatterySlot
