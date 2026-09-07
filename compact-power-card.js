@@ -1506,7 +1506,7 @@ class CompactPowerCard extends CompactPowerCardBase {
       const startY = iconRect.top + iconRect.height / 2 - cardRect.top;
       // Arc OVER the top: horizontal line ABOVE the PV value (at pctBaseY(32)%)
       const upY = startY - 6;
-      const peakY = Math.min(upY - 6, pvNodeY - 37);  // quarter distance to top edge
+      const peakY = Math.min(upY - 6, pvNodeY - 40);  // eighth distance to top edge
       const horizDist = Math.abs(pvCenterX - startX);
       const cornerRadius = Math.min(5, horizDist / 2);
       const dir = pvCenterX >= startX ? 1 : -1;
@@ -4314,7 +4314,7 @@ class CompactPowerCard extends CompactPowerCardBase {
                   </div>
                 </div>`
               : ""}
-            <div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(pvNodeY - 38)}%; z-index: 20;">
+            <div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(pvNodeY - 40)}%; z-index: 20;">
                 <div class="pv-power-dot" style="display: block; width: calc(8px * var(--cpc-scale, 1)); height: calc(8px * var(--cpc-scale, 1)); border-radius: 50%; background: ${pvColor};"></div>
               </div>
             ${pvInBatterySlot
