@@ -1517,11 +1517,12 @@ class CompactPowerCard extends CompactPowerCardBase {
       const path = document.createElementNS(ns, "path");
       path.setAttribute("d", d);
       path.setAttribute("fill", "none");
-      path.setAttribute("stroke", label.color || "var(--energy-solar-color)");
+      path.setAttribute("stroke", "#ffcc00");  // explicit yellow
       path.setAttribute("class", "device-line");
-      path.setAttribute("stroke-width", "2");
+      path.setAttribute("stroke-width", "3");
       path.setAttribute("stroke-linecap", "round");
       path.setAttribute("vector-effect", "non-scaling-stroke");
+      path.setAttribute("stroke-opacity", "1");  // force visible
       // Opacity like flow lines (PV->Grid): 0.4 at 0W, 1 otherwise
       const labelState = this._hass?.states?.[label.entity];
       const labelVal = labelState ? Math.abs(parseFloat(labelState.state) || 0) : 0;
@@ -1572,7 +1573,7 @@ class CompactPowerCard extends CompactPowerCardBase {
         `device-line${flicker ? " device-line-flicker" : ""}`
       );
       path.style.setProperty("--device-line-opacity", String(ln.opacity ?? 1));
-      path.setAttribute("stroke-width", "2");
+      path.setAttribute("stroke-width", "3");
       path.setAttribute("stroke-linecap", "round");
       path.setAttribute("vector-effect", "non-scaling-stroke");
       if (ln.dashed && !flicker) {
