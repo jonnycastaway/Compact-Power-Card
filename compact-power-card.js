@@ -4315,7 +4315,7 @@ class CompactPowerCard extends CompactPowerCardBase {
                 </div>`
               : ""}
             <div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(pvNodeY - 34)}%; z-index: 20;">
-                <div class="pv-power-dot" style="display: block; width: calc(12px * var(--cpc-scale, 1)); height: calc(12px * var(--cpc-scale, 1)); border-radius: 50%; background: ${pvColor}; box-shadow: 0 0 8px ${pvColor};"></div>
+                <div class="pv-power-dot" style="display: block; width: calc(8px * var(--cpc-scale, 1)); height: calc(8px * var(--cpc-scale, 1)); border-radius: 50%; background: ${pvColor};"></div>
               </div>
             ${pvInBatterySlot
               ? html`<div class="overlay-item anchor-right pv-section pv-section-battery" style="left:${((batteryIconX + 6)/baseWidth)*100}%; top:${batteryIconTop + 3}px;">
