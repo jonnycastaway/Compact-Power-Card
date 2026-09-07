@@ -1092,10 +1092,14 @@ class CompactPowerCard extends CompactPowerCardBase {
       .node-label,
       .home-label,
       .aux-label,
-      .aux-sub-label,
       .device-name,
       .battery-soc {
         padding: 2px 4px;
+      }
+      .aux-sub-label {
+        padding: 0;
+      }
+      .aux-sub-label._legacy_padding {
         border-radius: 4px;
         white-space: nowrap;
       }
