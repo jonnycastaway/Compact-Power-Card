@@ -1030,7 +1030,7 @@ class CompactPowerCard extends CompactPowerCardBase {
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 2px;
+        gap: 0px;
         user-select: none;
         position: relative;
       }
