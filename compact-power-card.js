@@ -1051,20 +1051,24 @@ class CompactPowerCard extends CompactPowerCardBase {
       }
 
       .aux-sub-label.label-secondary {
-        margin-top: 2px;
+        margin-top: 0px;
+        line-height: 1;
       }
 
       .aux-sub-label.label-name {
-        margin-top: 2px;
+        margin-top: 0px;
         font-weight: 400;
+        line-height: 1;
       }
 
       .pv-label-marker .aux-sub-label.label-name {
-        margin-top: 2px;
+        margin-top: 0px;
         font-weight: 400;
+        line-height: 1;
       }
       .pv-label-marker .aux-sub-label.label-secondary {
-        margin-top: 2px;
+        margin-top: 0px;
+        line-height: 1;
       }
 
       .device-name {
