@@ -1474,6 +1474,7 @@ class CompactPowerCard extends CompactPowerCardBase {
     if (!group) return;
     group.innerHTML = "";
     const lines = Array.isArray(this._pvLabelLineItems) ? this._pvLabelLineItems : [];
+    if (typeof console !== "undefined" && lines.length) console.log("[cpc] pvLabelLine d:", lines.map(l => l.d));
     const ns = "http://www.w3.org/2000/svg";
     for (const ln of lines) {
       const path = document.createElementNS(ns, "path");
@@ -4058,7 +4059,7 @@ class CompactPowerCard extends CompactPowerCardBase {
         const numeric = Math.abs(parseFloat(st.state) || 0);
         const color = lbl.color || pvColor;
         const horiz = Math.abs(pvCenterX - startX);
-        const corner = Math.min(4, horiz / 2);   // same corner radius as device lines
+        const corner = Math.min(8, horiz / 2);   // visible device-style round (was 4, too subtle at 2px stroke)
         const dirx = pvCenterX >= startX ? 1 : -1;
         // Exact device-line geometry (mirrored): stub up to busY, Q-curve at the junction, horizontal to center
         const d = `M${startX} ${stubBottomY} V${busY + corner} ` +
