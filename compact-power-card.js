@@ -1485,6 +1485,7 @@ class CompactPowerCard extends CompactPowerCardBase {
       path.setAttribute("stroke", ln.color);
       path.setAttribute("class", "device-line");
       path.style.setProperty("--device-line-opacity", String(ln.opacity));
+      path.setAttribute("stroke-opacity", String(ln.opacity));
       path.setAttribute("stroke-width", "3");
       path.setAttribute("stroke-linecap", "round");
       path.setAttribute("vector-effect", "non-scaling-stroke");
@@ -4092,7 +4093,7 @@ class CompactPowerCard extends CompactPowerCardBase {
         pvLabelLineItems.push({
           d,
           color,
-          opacity: numeric > 0 ? 1 : 0.4,
+          opacity: numeric > 0 ? 1 : 0.15,
           glow: allowGlow && numeric > 0 ? `drop-shadow(0 0 6px ${color})` : "none",
         });
       });
