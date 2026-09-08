@@ -1503,10 +1503,15 @@ class CompactPowerCard extends CompactPowerCardBase {
       const pulseMin = 0.6, pulseMax = 2.2, pulsePeak = 5000;
       const t = Math.min(pvW, pulsePeak) / pulsePeak;
       const secs = pulseMax - (pulseMax - pulseMin) * t;
-      // fully inline animation (CSS classes can fight the injected duration)
-      c.style.animation = `cpc-pulse ${secs.toFixed(2)}s ease-in-out infinite`;
-      c.style.transformBox = "fill-box";
-      c.style.transformOrigin = "center";
+      // native SVG radius animation: pixel-accurate smooth grow/shrink like the device dot (8px div)
+      // r base 4 => scale 0.85..1.15 => 3.4..4.6
+      const a = document.createElementNS(ns, "animate");
+      a.setAttribute("attributeName", "r");
+      a.setAttribute("values", "3.4;4.6;3.4");
+      a.setAttribute("keyTimes", "0;0.5;1");
+      a.setAttribute("dur", secs.toFixed(2) + "s");
+      a.setAttribute("repeatCount", "indefinite");
+      c.appendChild(a);
       group.appendChild(c);
     }
   }
