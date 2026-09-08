@@ -4031,10 +4031,11 @@ class CompactPowerCard extends CompactPowerCardBase {
         pvLabelLineItems.push({
           d: d(posX),
           stroke: lbl.color || pvColor,
-          opacity: numeric > 0 ? 1 : 0.4,
+          opacity: 1,  // ALWAYS fully visible for debug
         });
       });
     }
+    if (typeof console !== "undefined") console.log("[cpc] pvLabelLineItems:", pvLabelLineItems);
 
     const batteryDetails =
       batteryList.length > 1
