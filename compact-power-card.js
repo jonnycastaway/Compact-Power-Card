@@ -4058,7 +4058,7 @@ class CompactPowerCard extends CompactPowerCardBase {
         const numeric = Math.abs(parseFloat(st.state) || 0);
         const color = lbl.color || pvColor;
         const horiz = Math.abs(pvCenterX - startX);
-        const corner = Math.min(8, horiz / 2);   // visible device-style round (was 4, too subtle at 2px stroke)
+        const corner = Math.min(4, horiz / 2);   // tighter bend, same radius as device lines
         const dirx = pvCenterX >= startX ? 1 : -1;
         // Exact device-line geometry (mirrored): stub up to busY, Q-curve at the junction, horizontal to center
         const d = `M${startX} ${stubBottomY} V${busY + corner} ` +
