@@ -980,7 +980,7 @@ class CompactPowerCard extends CompactPowerCardBase {
       }
 
       .pv-power-dot-pulse {
-        animation: cpc-pulse var(--pv-pulse-duration, 1.4s) ease-in-out infinite;
+        animation: cpc-pulse var(--pv-pulse-duration, 2.2s) ease-in-out infinite;
         transform-box: fill-box;
         transform-origin: center;
       }
@@ -1511,6 +1511,7 @@ class CompactPowerCard extends CompactPowerCardBase {
       const pulseMin = 0.6, pulseMax = 2.2, pulsePeak = 5000;
       const t = Math.min(pvW, pulsePeak) / pulsePeak;
       const secs = pulseMax - (pulseMax - pulseMin) * t;
+      c.style.animationDuration = secs.toFixed(2) + "s";
       c.style.setProperty("--pv-pulse-duration", secs.toFixed(2) + "s");
       group.appendChild(c);
     }
