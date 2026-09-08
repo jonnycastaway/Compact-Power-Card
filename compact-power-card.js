@@ -1500,18 +1500,21 @@ class CompactPowerCard extends CompactPowerCardBase {
       c.setAttribute("r", "4");
       c.setAttribute("fill", dot.color || "var(--energy-solar-color)");
       const pvW = Math.abs(this._pvDotWatts || 0);
-      const pulseMin = 0.6, pulseMax = 2.2, pulsePeak = 5000;
-      const t = Math.min(pvW, pulsePeak) / pulsePeak;
-      const secs = pulseMax - (pulseMax - pulseMin) * t;
-      // native SVG radius animation: pixel-accurate smooth grow/shrink like the device dot (8px div)
-      // r base 4 => scale 0.85..1.15 => 3.4..4.6
-      const a = document.createElementNS(ns, "animate");
-      a.setAttribute("attributeName", "r");
-      a.setAttribute("values", "3.4;4.6;3.4");
-      a.setAttribute("keyTimes", "0;0.5;1");
-      a.setAttribute("dur", secs.toFixed(2) + "s");
-      a.setAttribute("repeatCount", "indefinite");
-      c.appendChild(a);
+      // When PV main is 0W: no pulse, dimmed dot. Otherwise animate like the device dot.
+      if (pvW > 0) {
+        const pulseMin = 0.6, pulseMax = 2.2, pulsePeak = 5000;
+        const t = Math.min(pvW, pulsePeak) / pulsePeak;
+        const secs = pulseMax - (pulseMax - pulseMin) * t;
+        const a = document.createElementNS(ns, "animate");
+        a.setAttribute("attributeName", "r");
+        a.setAttribute("values", "3.4;4.6;3.4");
+        a.setAttribute("keyTimes", "0;0.5;1");
+        a.setAttribute("dur", secs.toFixed(2) + "s");
+        a.setAttribute("repeatCount", "indefinite");
+        c.appendChild(a);
+      } else {
+        c.setAttribute("opacity", "0.35");
+      }
       group.appendChild(c);
     }
   }
