@@ -1235,6 +1235,7 @@ class CompactPowerCard extends CompactPowerCardBase {
     if (super.updated) super.updated(changedProps);
     this._adjustLayout();
     this._renderDeviceLines();
+    this._renderPvLabelLines();
     this._logLayoutSizes();
     const layoutKey = `${this._hostWidth ?? 0}x${this._hostHeight ?? 0}x${this._externalHeight ?? 0}`;
     if (layoutKey !== this._lastFlowLayoutKey) {
@@ -1465,6 +1466,30 @@ class CompactPowerCard extends CompactPowerCardBase {
       .replace("{secondary}", secondary);
   }
 
+
+  _renderPvLabelLines() {
+    const root = this.shadowRoot;
+    if (!root) return;
+    const group = root.getElementById("pv-label-lines");
+    if (!group) return;
+    group.innerHTML = "";
+    const lines = Array.isArray(this._pvLabelLineItems) ? this._pvLabelLineItems : [];
+    const ns = "http://www.w3.org/2000/svg";
+    for (const ln of lines) {
+      const path = document.createElementNS(ns, "path");
+      path.setAttribute("d", ln.d);
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", ln.color);
+      path.setAttribute("stroke-width", "2");
+      path.setAttribute("stroke-linecap", "round");
+      path.setAttribute("vector-effect", "non-scaling-stroke");
+      path.setAttribute("stroke-opacity", String(ln.opacity));
+      if (ln.glow && ln.glow !== "none") {
+        path.style.filter = ln.glow;
+      }
+      group.appendChild(path);
+    }
+  }
 
   _renderDeviceLines() {
     const root = this.shadowRoot;
@@ -4022,9 +4047,8 @@ class CompactPowerCard extends CompactPowerCardBase {
     if (this._usePvLabelLines() && pvLabelPositions.length) {
       const allowGlow = this._allowGlowEffects();
       const busY = sy(-2);                       // bus line Y (2px from top) - UNCHANGED
-      const busPct = pctBaseY(busY);             // bus line + dot (unchanged)
-      const stubLen = 10;                        // vertical stub length below bus - UNCHANGED
-      const centerXpct = (pvCenterX / baseWidth) * 100;
+      const stubLen = 10;                        // vertical stub below bus - UNCHANGED
+      const stubBottomY = busY + stubLen;
       pvLabels.slice(0, pvLabelMax).forEach((lbl, idx) => {
         if (!lbl?.entity) return;
         const st = this.hass?.states?.[lbl.entity];
@@ -4033,14 +4057,18 @@ class CompactPowerCard extends CompactPowerCardBase {
         if (startX == null) return;
         const numeric = Math.abs(parseFloat(st.state) || 0);
         const color = lbl.color || pvColor;
-        const xPct = (startX / baseWidth) * 100;
+        const horiz = Math.abs(pvCenterX - startX);
+        const corner = Math.min(4, horiz / 2);   // same small corner as device lines
+        const dirx = pvCenterX >= startX ? 1 : -1;
+        // Device-style Q-rounded corner: horizontal on busY, vertical stub, rounded junction
+        const d = `M${startX + dirx * corner} ${busY} H${pvCenterX} ` +
+                  `M${startX} ${busY + corner} V${stubBottomY} ` +
+                  `M${startX} ${busY + corner} Q${startX} ${busY} ${startX + dirx * corner} ${busY}`;
         pvLabelLineItems.push({
-          x: xPct,
-          centerX: centerXpct,
-          yBus: busPct,
+          d,
           color,
           opacity: numeric > 0 ? 1 : 0.4,
-          glow: numeric > 0 ? `drop-shadow(0 0 6px ${color})` : "none",
+          glow: allowGlow && numeric > 0 ? `drop-shadow(0 0 6px ${color})` : "none",
         });
       });
     }
@@ -4281,11 +4309,7 @@ class CompactPowerCard extends CompactPowerCardBase {
                   </div>
                 </div>`
               : ""}
-            ${pvLabelLineItems.map(ln => html`
-              <div style="position:absolute; left:${Math.min(ln.x, ln.centerX)}%; top:${ln.yBus}%; width:${Math.abs(ln.centerX - ln.x)}%; height:2px; background:${ln.color}; opacity:${ln.opacity}; filter:${ln.glow}; pointer-events:none;"></div>
-              <div style="position:absolute; left:${ln.x}%; top:${ln.yBus}%; width:2px; height:${(10 / viewHeight) * 100}%; background:${ln.color}; opacity:${ln.opacity}; filter:${ln.glow}; pointer-events:none; border-radius:0 0 4px 4px;"></div>
-              <div style="position:absolute; left:${ln.x}%; top:${ln.yBus}%; width:2px; height:2px; background:${ln.color}; opacity:${ln.opacity}; filter:${ln.glow}; pointer-events:none; border-radius:50%;"></div>
-            `)}
+
             <div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(sy(-2)) + (1 / viewHeight) * 100}%; z-index: 20;">
                 <div class="pv-power-dot" style="display: block; width: calc(8px * var(--cpc-scale, 1)); height: calc(8px * var(--cpc-scale, 1)); border-radius: 50%; background: ${pvColor};"></div>
               </div>
