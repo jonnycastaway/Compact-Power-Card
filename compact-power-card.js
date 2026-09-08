@@ -4056,7 +4056,7 @@ class CompactPowerCard extends CompactPowerCardBase {
     // Device: M startX startY V(downY-corner) Q startX downY (startX+dir*corner) downY H homeX
     // Here (inverted): vertical from label up to busY, small round at the PV center level.
     const pvLabelLineItems = [];
-    const busY = sy(-1);                          // bus line Y, 1px lower
+    const busY = sy(1);                           // bus line Y, 2px lower (was sy(-1))
     const stubBottomY = busY + 8;                 // 8px stub below bus (like device lines)
     const pvDot = { x: pvCenterX, y: busY };      // dot sits ON the bus line, same system as lines
     if (this._usePvLabelLines() && pvLabelPositions.length) {
