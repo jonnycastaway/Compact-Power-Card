@@ -4047,8 +4047,8 @@ class CompactPowerCard extends CompactPowerCardBase {
     const pvLabelLineItems = [];
     if (this._usePvLabelLines() && pvLabelPositions.length) {
       const allowGlow = this._allowGlowEffects();
-      const busY = sy(pvNodeY - 40);          // horizontal runs through dot center (matches dot Y)
-      const startY = sy(pvLabelY);             // line leaves at the label icon row
+      const startY = sy(pvLabelY);             // label icon row
+      const busY = startY - 8;                 // horizontal line just above labels (short vertical, 8px)
       pvLabels.slice(0, pvLabelMax).forEach((lbl, idx) => {
         if (!lbl?.entity) return;
         const st = this.hass?.states?.[lbl.entity];
@@ -4306,7 +4306,7 @@ class CompactPowerCard extends CompactPowerCardBase {
                   </div>
                 </div>`
               : ""}
-            <div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(pvNodeY - 40)}%; z-index: 20;">
+            <div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(sy(pvLabelY) - 8)}%; z-index: 20;">
                 <div class="pv-power-dot" style="display: block; width: calc(8px * var(--cpc-scale, 1)); height: calc(8px * var(--cpc-scale, 1)); border-radius: 50%; background: ${pvColor};"></div>
               </div>
             ${pvInBatterySlot
