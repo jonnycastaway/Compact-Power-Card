@@ -1511,6 +1511,7 @@ class CompactPowerCard extends CompactPowerCardBase {
       const pulseMin = 0.6, pulseMax = 2.2, pulsePeak = 5000;
       const t = Math.min(pvW, pulsePeak) / pulsePeak;
       const secs = pulseMax - (pulseMax - pulseMin) * t;
+      if (typeof console !== "undefined") console.log("[cpc] pvDot pvW=", pvW, "secs=", secs.toFixed(2));
       c.style.animationDuration = secs.toFixed(2) + "s";
       c.style.setProperty("--pv-pulse-duration", secs.toFixed(2) + "s");
       group.appendChild(c);
