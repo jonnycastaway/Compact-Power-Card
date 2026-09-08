@@ -1238,7 +1238,6 @@ class CompactPowerCard extends CompactPowerCardBase {
     this._adjustLayout();
     this._renderDeviceLines();
     this._logLayoutSizes();
-    this._renderPvLabelLines();
     const layoutKey = `${this._hostWidth ?? 0}x${this._hostHeight ?? 0}x${this._externalHeight ?? 0}`;
     if (layoutKey !== this._lastFlowLayoutKey) {
       this._lastFlowLayoutKey = layoutKey;
@@ -1469,67 +1468,65 @@ class CompactPowerCard extends CompactPowerCardBase {
   }
 
   _renderPvLabelLines() {
-    if (!this._usePvLabelLines()) return;
-    const root = this.shadowRoot;
-    if (!root) return;
-    const group = root.getElementById("pv-label-lines");
-    if (!group) return;
-    group.innerHTML = "";
-    const pvTotal = this._getPvTotalPower();
-    if (pvTotal <= 0) return;
-    const pvConfig = this._getEntityConfig("pv");
-    const labels = pvConfig?.labels || [];
-    const pvMarker = root.querySelector(".pv-marker");
-    if (!pvMarker) return;
-    const pvRect = pvMarker.getBoundingClientRect();
-    const cardRect = root.querySelector("ha-card")?.getBoundingClientRect();
-    if (!cardRect) return;
-    const pvCenterX = pvRect.left + pvRect.width / 2 - cardRect.left;
-    const pvCenterY = pvRect.top + pvRect.height / 2 - cardRect.top;
-    const now = Date.now();
-    let nextFlickerEnd = null;
-    const ns = "http://www.w3.org/2000/svg";
-    for (const [idx, label] of labels.entries()) {
+    // Rendered declaratively in render() - no manual DOM manipulation
+  }
+
+  _getPvLabelLines() {
+    if (!this._usePvLabelLines()) return [];
+    const labels = this._config?.entities?.pv?.labels || [];
+    if (!labels.length) return [];
+
+    const metrics = this._getLayoutMetrics({ hasPv: true, hasBattery: !!this._getEntityConfig("battery"), hasAnyLabels: true });
+    const pvCenterX = metrics.pvCenterX;
+    const pvNodeY = metrics.pvNodeY;
+    const pvLabelY = metrics.pvLabelY || 28;
+    const labelCount = this._config.entities.pv.labels.length;
+    const pvLabelPad = Math.max(16, metrics.baseWidth * 0.05);
+    const pvColumnWidth = metrics.columnCount > 0 ? metrics.baseWidth / metrics.columnCount : metrics.baseWidth / 12;
+    const pvLabelSpacingBase = Math.max(pvColumnWidth * 1.5, 56 * (metrics.baseWidth / metrics.designWidth));
+    const pvLabelCap = Math.max(4, metrics.maxItemsByColumns);
+    const pvRings = Math.max(1, Math.ceil(labelCount / 2));
+    const pvMaxSpacing = (metrics.baseWidth / 2 - pvLabelPad) / Math.max(1, Math.ceil(labelCount / 2));
+    const pvLabelSpacing = Math.max(0, Math.min(pvLabelSpacingBase, pvMaxSpacing));
+
+    const lines = [];
+    for (let idx = 0; idx < labelCount; idx++) {
+      const label = this._config.entities.pv.labels[idx];
       if (!label?.entity) continue;
       const state = this._hass?.states?.[label.entity];
       if (!state) continue;
       const val = Math.abs(parseFloat(state.state) || 0);
-      const labelEl = root.querySelector(`.overlay-item.pv-label-marker[data-index="${idx}"]`);
-      if (!labelEl) continue;
-      // Use icon position (above text/name)
-      const iconEl = labelEl.querySelector("ha-icon");
-      if (!iconEl) continue;
-      const iconRect = iconEl.getBoundingClientRect();
-      const startX = iconRect.left + iconRect.width / 2 - cardRect.left;
-      const startY = iconRect.top + iconRect.height / 2 - cardRect.top;
-      // Arc OVER the top: horizontal line ABOVE the PV value (at pctBaseY(32)%)
-      const upY = startY - 6;
-      const peakY = Math.min(upY - 6, pvNodeY - 40);  // eighth distance to top edge
-      const horizDist = Math.abs(pvCenterX - startX);
-      const cornerRadius = Math.min(5, horizDist / 2);
-      const dir = pvCenterX >= startX ? 1 : -1;
-      const useCurve = cornerRadius > 0 && horizDist > 0;
-      const d = useCurve
-        ? `M${startX} ${startY} V${upY} Q${startX} ${peakY} ${startX + dir * cornerRadius} ${peakY} H${pvCenterX}`
-        : `M${startX} ${startY} V${upY} H${pvCenterX}`;
-      const path = document.createElementNS(ns, "path");
-      path.setAttribute("d", d);
-      path.setAttribute("fill", "none");
-      path.setAttribute("stroke", "#ffcc00");  // explicit yellow
-      path.setAttribute("class", "device-line");
-      path.setAttribute("stroke-width", "3");
-      path.setAttribute("stroke-linecap", "round");
-      path.setAttribute("vector-effect", "non-scaling-stroke");
-      path.setAttribute("stroke-opacity", "1");  // force visible
-      // Opacity like flow lines (PV->Grid): 0.4 at 0W, 1 otherwise
-      const labelState = this._hass?.states?.[label.entity];
-      const labelVal = labelState ? Math.abs(parseFloat(labelState.state) || 0) : 0;
-      const lineOpacity = (labelVal === 0) ? 0.4 : 1;
-      path.style.setProperty("--device-line-opacity", String(lineOpacity));
-      group.appendChild(path);
-    }
-  }
+      if (val <= 0) continue;
 
+      // Calculate label position in SVG coordinates (same as in render)
+      const ring = Math.floor(idx / 2) + 1;
+      const isRight = idx % 2 === 1;
+      const offsetX = Math.min(pvLabelSpacing * ring, (metrics.baseWidth / 2) - 20);
+      const x = idx % 2 === 1 ? metrics.pvCenterX + offsetX : metrics.pvCenterX - offsetX;
+      const startY = metrics.sy(pvLabelY);
+      
+      const startX = idx % 2 === 1 ? metrics.pvCenterX + Math.min(pvLabelSpacing * (Math.floor(idx / 2) + 1), (metrics.baseWidth / 2) - 20) : metrics.pvCenterX - Math.min(pvLabelSpacing * (Math.floor(idx / 2) + 1), (metrics.baseWidth / 2) - 20);
+      
+      // Arc OVER the top: horizontal line well above PV value
+      const upY = metrics.sy(pvLabelY) - 6;
+      const peakY = Math.min(metrics.sy(pvLabelY) - 12, metrics.pvNodeY - 40);
+      const horizDist = Math.abs(metrics.pvCenterX - startX);
+      const cornerRadius = Math.min(5, horizDist / 2);
+      const dir = metrics.pvCenterX >= startX ? 1 : -1;
+      const useCurve = cornerRadius > 0 && horizDist > 0;
+      
+      const d = useCurve
+        ? `M${startX} ${startY} V${upY} Q${startX} ${peakY} ${startX + dir * cornerRadius} ${peakY} H${metrics.pvCenterX}`
+        : `M${startX} ${startY} V${upY} H${metrics.pvCenterX}`;
+
+      if (!state) continue;
+      if (val <= 0) continue;
+      const lineOpacity = (val === 0) ? 0.4 : 1;
+
+      lines.push({ d, lineOpacity });
+    }
+    return lines;
+  }
   _renderDeviceLines() {
     const root = this.shadowRoot;
     if (!root) return;
@@ -3960,9 +3957,6 @@ class CompactPowerCard extends CompactPowerCardBase {
         this.hass?.states?.[entity]?.attributes?.unit_of_measurement ||
         "";
       const numericW = isUnavailable ? 0 : this._toWatts(numeric, labelUnit, true);
-      const hasNumeric = isUnavailable
-        ? true
-        : Number.isFinite(isPowerEntity ? numericW : numeric);
       const val = isUnavailable
         ? "0"
         : hasNumeric
@@ -4043,9 +4037,6 @@ class CompactPowerCard extends CompactPowerCardBase {
           this.hass?.states?.[entity]?.attributes?.unit_of_measurement ||
           "";
         const numericW = isUnavailable ? 0 : this._toWatts(numeric, labelUnit, true);
-        const hasNumeric = isUnavailable
-          ? true
-          : Number.isFinite(isPowerEntity ? numericW : numeric);
         const val = isUnavailable
           ? "0"
           : hasNumeric
@@ -4225,7 +4216,20 @@ class CompactPowerCard extends CompactPowerCardBase {
           <circle id="dot-pv-home"      r="4" fill="${pvColor}" opacity="0" />
           <path id="arc-grid-battery" class="flow-line" fill="none" d="${gridBatteryPath}" />
           <g id="device-lines"></g>
-          <g id="pv-label-lines"></g>
+          <g id="pv-label-lines">
+            ${this._getPvLabelLines().map(line => html`
+              <path
+                class="device-line"
+                d="${line.d}"
+                stroke="#ffcc00"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-opacity="${line.lineOpacity}"
+                fill="none"
+                vector-effect="non-scaling-stroke"
+              ></path>
+            `)}
+          </g>
 
           <!-- Remaining flow dots -->
           <circle id="dot-pv-grid"      r="4" fill="${pvColor}" opacity="0" />
