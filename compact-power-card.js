@@ -4285,10 +4285,10 @@ class CompactPowerCard extends CompactPowerCardBase {
                 </div>`
               : ""}
 
-            ${pvLabelLineItems.map(ln => html`
-              <div style="position:absolute; left:${Math.min(ln.x, ln.centerX)}%; top:${ln.yBus}%; width:${Math.abs(ln.centerX - ln.x)}%; height:2px; background:${ln.color}; opacity:${ln.opacity}; filter:${ln.glow}; pointer-events:none;"></div>
-              <div style="position:absolute; left:${ln.x}%; top:${ln.yBus}%; width:2px; height:${ln.yBottom - ln.yBus}%; background:${ln.color}; opacity:${ln.opacity}; filter:${ln.glow}; pointer-events:none; border-radius:0 0 3px 3px;"></div>
-            `)}
+            ${(() => { if (typeof console !== "undefined") console.log("[cpc] lineItems:", pvLabelLineItems); return pvLabelLineItems.map(ln => html`
+              <div style="position:absolute; left:${Math.min(ln.x, ln.centerX)}%; top:${ln.yBus}%; width:${Math.abs(ln.centerX - ln.x)}%; height:2px; background:${ln.color}; opacity:${ln.opacity}; filter:${ln.glow}; pointer-events:none; z-index:15;"></div>
+              <div style="position:absolute; left:${ln.x}%; top:${ln.yBus}%; width:2px; height:${ln.yBottom - ln.yBus}%; background:${ln.color}; opacity:${ln.opacity}; filter:${ln.glow}; pointer-events:none; border-radius:0 0 3px 3px; z-index:15;"></div>
+            `); })()}
             <div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(sy(-2)) + (1 / viewHeight) * 100}%; z-index: 20;">
                 <div class="pv-power-dot" style="display: block; width: calc(8px * var(--cpc-scale, 1)); height: calc(8px * var(--cpc-scale, 1)); border-radius: 50%; background: ${pvColor};"></div>
               </div>
