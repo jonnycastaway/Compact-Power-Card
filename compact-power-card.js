@@ -1235,6 +1235,7 @@ class CompactPowerCard extends CompactPowerCardBase {
     if (super.updated) super.updated(changedProps);
     this._adjustLayout();
     this._renderDeviceLines();
+    this._renderPvLabelLines();
     this._logLayoutSizes();
     const layoutKey = `${this._hostWidth ?? 0}x${this._hostHeight ?? 0}x${this._externalHeight ?? 0}`;
     if (layoutKey !== this._lastFlowLayoutKey) {
@@ -1465,6 +1466,31 @@ class CompactPowerCard extends CompactPowerCardBase {
       .replace("{secondary}", secondary);
   }
 
+
+  _renderPvLabelLines() {
+    const root = this.shadowRoot;
+    if (!root) return;
+    const group = root.getElementById("pv-label-lines");
+    if (!group) return;
+    group.innerHTML = "";
+    const lines = Array.isArray(this._pvLabelLineItems) ? this._pvLabelLineItems : [];
+    if (typeof console !== "undefined") console.log("[cpc] pvLines render:", lines.length, lines[0]);
+    const ns = "http://www.w3.org/2000/svg";
+    for (const ln of lines) {
+      const path = document.createElementNS(ns, "path");
+      path.setAttribute("d", ln.d);
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", ln.color);
+      path.setAttribute("stroke-width", "3");
+      path.setAttribute("stroke-linecap", "round");
+      path.setAttribute("vector-effect", "non-scaling-stroke");
+      path.setAttribute("stroke-opacity", String(ln.opacity));
+      if (ln.glow && ln.glow !== "none") {
+        path.style.filter = ln.glow;
+      }
+      group.appendChild(path);
+    }
+  }
 
   _renderDeviceLines() {
     const root = this.shadowRoot;
@@ -4040,6 +4066,8 @@ class CompactPowerCard extends CompactPowerCardBase {
         });
       });
     }
+    this._pvLabelPos = pvLabelPositions;
+    this._pvLabelLineItems = pvLabelLineItems;
 
     const batteryDetails =
       batteryList.length > 1
@@ -4187,14 +4215,7 @@ class CompactPowerCard extends CompactPowerCardBase {
           <circle id="dot-pv-home"      r="4" fill="${pvColor}" opacity="0" />
           <path id="arc-grid-battery" class="flow-line" fill="none" d="${gridBatteryPath}" />
           <g id="device-lines"></g>
-          <g id="pv-label-lines">
-            ${pvLabelLineItems.map(ln => html`
-              <path d="${ln.d}" fill="none" stroke="${ln.color}" stroke-width="3"
-                    stroke-linecap="round" vector-effect="non-scaling-stroke"
-                    stroke-opacity="${ln.opacity}"
-                    style="${ln.glow !== "none" ? `filter:${ln.glow}` : ""}"></path>
-            `)}
-          </g>
+          <g id="pv-label-lines"></g>
 
           <!-- Remaining flow dots -->
           <circle id="dot-pv-grid"      r="4" fill="${pvColor}" opacity="0" />
