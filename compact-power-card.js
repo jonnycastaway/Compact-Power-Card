@@ -572,8 +572,6 @@ class CompactPowerCard extends CompactPowerCardBase {
     this._deviceLineFlickerTimer = null;
     this._labelFlickerStates = new Map();
     this._labelFlickerTimer = null;
-    this._pvLabelLineStates = new Map();
-    this._pvLabelLineFlickerTimer = null;
     this._trackedEntityIds = new Set();
     this._lastEntityStates = new Map();
     this._lastThemeMode = null;
@@ -1238,7 +1236,6 @@ class CompactPowerCard extends CompactPowerCardBase {
     this._adjustLayout();
     this._renderDeviceLines();
     this._logLayoutSizes();
-    this._renderPvLabelLines();
     const layoutKey = `${this._hostWidth ?? 0}x${this._hostHeight ?? 0}x${this._externalHeight ?? 0}`;
     if (layoutKey !== this._lastFlowLayoutKey) {
       this._lastFlowLayoutKey = layoutKey;
@@ -1468,67 +1465,6 @@ class CompactPowerCard extends CompactPowerCardBase {
       .replace("{secondary}", secondary);
   }
 
-  _renderPvLabelLines() {
-    if (!this._usePvLabelLines()) return;
-    const root = this.shadowRoot;
-    if (!root) return;
-    const group = root.getElementById("pv-label-lines");
-    if (!group) return;
-    group.innerHTML = "";
-    const pvTotal = this._getPvTotalPower();
-    if (pvTotal <= 0) return;
-    const pvConfig = this._getEntityConfig("pv");
-    const labels = pvConfig?.labels || [];
-    const pvMarker = root.querySelector(".pv-marker");
-    if (!pvMarker) return;
-    const pvRect = pvMarker.getBoundingClientRect();
-    const cardRect = root.querySelector("ha-card")?.getBoundingClientRect();
-    if (!cardRect) return;
-    const pvCenterX = pvRect.left + pvRect.width / 2 - cardRect.left;
-    const pvCenterY = pvRect.top + pvRect.height / 2 - cardRect.top;
-    const now = Date.now();
-    let nextFlickerEnd = null;
-    const ns = "http://www.w3.org/2000/svg";
-    for (const [idx, label] of labels.entries()) {
-      if (!label?.entity) continue;
-      const state = this._hass?.states?.[label.entity];
-      if (!state) continue;
-      const val = Math.abs(parseFloat(state.state) || 0);
-      const labelEl = root.querySelector(`.overlay-item.pv-label-marker[data-index="${idx}"]`);
-      if (!labelEl) continue;
-      // Use icon position (above text/name)
-      const iconEl = labelEl.querySelector("ha-icon");
-      if (!iconEl) continue;
-      const iconRect = iconEl.getBoundingClientRect();
-      const startX = iconRect.left + iconRect.width / 2 - cardRect.left;
-      const startY = iconRect.top + iconRect.height / 2 - cardRect.top;
-      // Arc OVER the top: horizontal line ABOVE the PV value (at pctBaseY(32)%)
-      const upY = startY - 6;
-      const peakY = Math.min(upY - 6, pvNodeY - 40);  // eighth distance to top edge
-      const horizDist = Math.abs(pvCenterX - startX);
-      const cornerRadius = Math.min(5, horizDist / 2);
-      const dir = pvCenterX >= startX ? 1 : -1;
-      const useCurve = cornerRadius > 0 && horizDist > 0;
-      const d = useCurve
-        ? `M${startX} ${startY} V${upY} Q${startX} ${peakY} ${startX + dir * cornerRadius} ${peakY} H${pvCenterX}`
-        : `M${startX} ${startY} V${upY} H${pvCenterX}`;
-      const path = document.createElementNS(ns, "path");
-      path.setAttribute("d", d);
-      path.setAttribute("fill", "none");
-      path.setAttribute("stroke", "#ffcc00");  // explicit yellow
-      path.setAttribute("class", "device-line");
-      path.setAttribute("stroke-width", "3");
-      path.setAttribute("stroke-linecap", "round");
-      path.setAttribute("vector-effect", "non-scaling-stroke");
-      path.setAttribute("stroke-opacity", "1");  // force visible
-      // Opacity like flow lines (PV->Grid): 0.4 at 0W, 1 otherwise
-      const labelState = this._hass?.states?.[label.entity];
-      const labelVal = labelState ? Math.abs(parseFloat(labelState.state) || 0) : 0;
-      const lineOpacity = (labelVal === 0) ? 0.4 : 1;
-      path.style.setProperty("--device-line-opacity", String(lineOpacity));
-      group.appendChild(path);
-    }
-  }
 
   _renderDeviceLines() {
     const root = this.shadowRoot;
@@ -4079,6 +4015,27 @@ class CompactPowerCard extends CompactPowerCardBase {
         };
       });
 
+    // PV label -> PV center lines (declarative SVG paths, viewBox coords)
+    const pvLabelLineItems = [];
+    if (this._usePvLabelLines() && pvLabelPositions.length) {
+      const lineY = sy(2);            // top bus line (matches dot at pvNodeY-40)
+      const labelStartY = sy(pvLabelY) - 6; // just above the label stack
+      const d = (x) => `M${x} ${labelStartY} L${x} ${lineY} L${pvCenterX} ${lineY}`;
+      pvLabels.slice(0, pvLabelMax).forEach((lbl, idx) => {
+        if (!lbl?.entity) return;
+        const st = this.hass?.states?.[lbl.entity];
+        if (!st) return;
+        const posX = pvLabelPositions[idx]?.x;
+        if (posX == null) return;
+        const numeric = Math.abs(parseFloat(st.state) || 0);
+        pvLabelLineItems.push({
+          d: d(posX),
+          stroke: lbl.color || pvColor,
+          opacity: numeric > 0 ? 1 : 0.4,
+        });
+      });
+    }
+
     const batteryDetails =
       batteryList.length > 1
         ? batteryComputed
@@ -4225,7 +4182,19 @@ class CompactPowerCard extends CompactPowerCardBase {
           <circle id="dot-pv-home"      r="4" fill="${pvColor}" opacity="0" />
           <path id="arc-grid-battery" class="flow-line" fill="none" d="${gridBatteryPath}" />
           <g id="device-lines"></g>
-          <g id="pv-label-lines"></g>
+          <g id="pv-label-lines">
+            ${pvLabelLineItems.map(line => html`
+              <path
+                d="${line.d}"
+                fill="none"
+                stroke="${line.stroke}"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-opacity="${line.opacity}"
+                vector-effect="non-scaling-stroke"
+              ></path>
+            `)}
+          </g>
 
           <!-- Remaining flow dots -->
           <circle id="dot-pv-grid"      r="4" fill="${pvColor}" opacity="0" />
