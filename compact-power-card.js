@@ -4021,13 +4021,9 @@ class CompactPowerCard extends CompactPowerCardBase {
     const pvLabelLineItems = [];
     if (this._usePvLabelLines() && pvLabelPositions.length) {
       const allowGlow = this._allowGlowEffects();
-      // Mirror of device line: device bus is 13px from bottom -> PV bus 13px from top.
-      // sy(v)=v+4; want 2px from top -> v=-2 -> busY=sy(-2)=2
-      const busY = sy(-2);
-      const busPct = pctBaseY(busY);                // bus line + dot
-      const iconTopY = sy(pvLabelY) - 16;           // top edge of label icon stack
-      const iconTopPct = pctBaseY(iconTopY);
-      const centerXpct = (pvCenterX / baseWidth) * 100;
+      const busY = sy(-2);                       // bus line Y (2px from top) - UNCHANGED
+      const stubLen = 10;                        // vertical stub length below bus - UNCHANGED
+      const stubBottomY = busY + stubLen;        // where vertical stub ends
       pvLabels.slice(0, pvLabelMax).forEach((lbl, idx) => {
         if (!lbl?.entity) return;
         const st = this.hass?.states?.[lbl.entity];
@@ -4036,15 +4032,17 @@ class CompactPowerCard extends CompactPowerCardBase {
         if (startX == null) return;
         const numeric = Math.abs(parseFloat(st.state) || 0);
         const color = lbl.color || pvColor;
-        const xPct = (startX / baseWidth) * 100;
+        const horiz = Math.abs(pvCenterX - startX);
+        const corner = Math.min(4, horiz / 2);    // round corner like device lines
+        const dirx = pvCenterX >= startX ? 1 : -1;
+        // Device-style path with Q-rounded corner at the bus junction:
+        // horizontal on busY from startX+corner to center, vertical stub down, rounded corner
+        const d = `M${startX + dirx * corner} ${busY} H${pvCenterX} M${startX} ${busY + corner} V${stubBottomY} M${startX} ${busY + corner} Q${startX} ${busY} ${startX + dirx * corner} ${busY}`;
         pvLabelLineItems.push({
-          x: xPct,
-          centerX: centerXpct,
-          yTop: iconTopPct,       // icon top (start of vertical)
-          yBus: busPct,           // bus line (top, 13px from edge) - where dot sits
+          d,
           color,
           opacity: numeric > 0 ? 1 : 0.4,
-          glow: numeric > 0 ? `drop-shadow(0 0 6px ${color})` : "none",
+          glow: allowGlow && numeric > 0 ? `drop-shadow(0 0 6px ${color})` : "none",
         });
       });
     }
@@ -4285,10 +4283,13 @@ class CompactPowerCard extends CompactPowerCardBase {
                   </div>
                 </div>`
               : ""}
-            ${pvLabelLineItems.map(ln => html`
-              <div style="position:absolute; left:${Math.min(ln.x, ln.centerX)}%; top:${ln.yBus}%; width:${Math.abs(ln.centerX - ln.x)}%; height:2px; background:${ln.color}; opacity:${ln.opacity}; filter:${ln.glow}; pointer-events:none;"></div>
-              <div style="position:absolute; left:${ln.x}%; top:${ln.yBus}%; width:2px; height:${(10 / viewHeight) * 100}%; background:${ln.color}; opacity:${ln.opacity}; filter:${ln.glow}; pointer-events:none; border-radius:0 0 4px 4px;"></div>
-            `)}
+            <svg viewBox="0 0 ${baseWidth} ${viewHeight}" preserveAspectRatio="none" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none;">
+              ${pvLabelLineItems.map(ln => html`
+                <path d="${ln.d}" fill="none" stroke="${ln.color}" stroke-width="2"
+                      stroke-linecap="round" stroke-opacity="${ln.opacity}"
+                      style="${ln.glow !== "none" ? `filter:${ln.glow}` : ""}"></path>
+              `)}
+            </svg>
             <div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(sy(-2)) + (1 / viewHeight) * 100}%; z-index: 20;">
                 <div class="pv-power-dot" style="display: block; width: calc(8px * var(--cpc-scale, 1)); height: calc(8px * var(--cpc-scale, 1)); border-radius: 50%; background: ${pvColor};"></div>
               </div>
