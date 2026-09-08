@@ -4058,12 +4058,11 @@ class CompactPowerCard extends CompactPowerCardBase {
         const numeric = Math.abs(parseFloat(st.state) || 0);
         const color = lbl.color || pvColor;
         const horiz = Math.abs(pvCenterX - startX);
-        const corner = Math.min(8, horiz / 2);   // visible rounded corner like device lines
+        const corner = Math.min(4, horiz / 2);   // same corner radius as device lines
         const dirx = pvCenterX >= startX ? 1 : -1;
-        // Device-style: vertical stub then arc-rounded junction onto the horizontal bus line
-        const sweep = dirx === 1 ? 1 : 0;
-        const d = `M${startX} ${busY + corner} V${stubBottomY} ` +
-                  `A${corner} ${corner} 0 0 ${sweep} ${startX + dirx * corner} ${busY} ` +
+        // Exact device-line geometry (mirrored): stub up to busY, Q-curve at the junction, horizontal to center
+        const d = `M${startX} ${stubBottomY} V${busY + corner} ` +
+                  `Q${startX} ${busY} ${startX + dirx * corner} ${busY} ` +
                   `H${pvCenterX}`;
         pvLabelLineItems.push({
           d,
