@@ -1477,6 +1477,7 @@ class CompactPowerCard extends CompactPowerCardBase {
 
   _renderPvLabelLines() {
     const root = this.shadowRoot;
+    if (typeof console !== "undefined") console.log("[cpc] renderPv called dot=", this._pvLabelDot, "watts=", this._pvDotWatts, "lines=", Array.isArray(this._pvLabelLineItems) ? this._pvLabelLineItems.length : 0);
     if (!root) return;
     const group = root.getElementById("pv-label-lines");
     if (!group) return;
