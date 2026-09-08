@@ -979,12 +979,6 @@ class CompactPowerCard extends CompactPowerCardBase {
         pointer-events: none;
       }
 
-      .pv-power-dot-pulse {
-        animation: cpc-pulse var(--pv-pulse-duration, 2.2s) ease-in-out infinite;
-        transform-box: fill-box;
-        transform-origin: center;
-      }
-
       .pv-power-dot-wrapper {
         pointer-events: none;
       }
@@ -1477,7 +1471,6 @@ class CompactPowerCard extends CompactPowerCardBase {
 
   _renderPvLabelLines() {
     const root = this.shadowRoot;
-    if (typeof console !== "undefined") console.log("[cpc] renderPv called dot=", this._pvLabelDot, "watts=", this._pvDotWatts, "lines=", Array.isArray(this._pvLabelLineItems) ? this._pvLabelLineItems.length : 0);
     if (!root) return;
     const group = root.getElementById("pv-label-lines");
     if (!group) return;
@@ -1506,15 +1499,14 @@ class CompactPowerCard extends CompactPowerCardBase {
       c.setAttribute("cy", String(dot.y));
       c.setAttribute("r", "4");
       c.setAttribute("fill", dot.color || "var(--energy-solar-color)");
-      c.setAttribute("class", "pv-power-dot-pulse");
-      // dynamic duration like the home/device dot (faster at higher power)
       const pvW = Math.abs(this._pvDotWatts || 0);
       const pulseMin = 0.6, pulseMax = 2.2, pulsePeak = 5000;
       const t = Math.min(pvW, pulsePeak) / pulsePeak;
       const secs = pulseMax - (pulseMax - pulseMin) * t;
-      if (typeof console !== "undefined") console.log("[cpc] pvDot pvW=", pvW, "secs=", secs.toFixed(2));
-      c.style.animationDuration = secs.toFixed(2) + "s";
-      c.style.setProperty("--pv-pulse-duration", secs.toFixed(2) + "s");
+      // fully inline animation (CSS classes can fight the injected duration)
+      c.style.animation = `cpc-pulse ${secs.toFixed(2)}s ease-in-out infinite`;
+      c.style.transformBox = "fill-box";
+      c.style.transformOrigin = "center";
       group.appendChild(c);
     }
   }
