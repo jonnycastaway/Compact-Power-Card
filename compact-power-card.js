@@ -1481,10 +1481,11 @@ class CompactPowerCard extends CompactPowerCardBase {
       path.setAttribute("d", ln.d);
       path.setAttribute("fill", "none");
       path.setAttribute("stroke", ln.color);
-      path.setAttribute("stroke-width", "2");
+      path.setAttribute("class", "device-line");
+      path.style.setProperty("--device-line-opacity", String(ln.opacity));
+      path.setAttribute("stroke-width", "3");
       path.setAttribute("stroke-linecap", "round");
       path.setAttribute("vector-effect", "non-scaling-stroke");
-      path.setAttribute("stroke-opacity", String(ln.opacity));
       if (ln.glow && ln.glow !== "none") {
         path.style.filter = ln.glow;
       }
