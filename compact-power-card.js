@@ -24,7 +24,7 @@ if (!CompactPowerCardBase || !compactPowerCardHtml || !compactPowerCardCss) {
     "compact-power-card: Failed to resolve Lit html/css helpers from the Home Assistant frontend."
   );
 }
-if (typeof console !== "undefined") console.log("[cpc] version fix-qround-dote-samesvg v1");
+if (typeof console !== "undefined") console.log("[cpc] version v2 busY=sy(1)");
 
 class CompactPowerCard extends CompactPowerCardBase {
 
