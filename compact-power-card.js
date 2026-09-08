@@ -1235,7 +1235,6 @@ class CompactPowerCard extends CompactPowerCardBase {
     if (super.updated) super.updated(changedProps);
     this._adjustLayout();
     this._renderDeviceLines();
-    this._renderPvLabelLines();
     this._logLayoutSizes();
     const layoutKey = `${this._hostWidth ?? 0}x${this._hostHeight ?? 0}x${this._externalHeight ?? 0}`;
     if (layoutKey !== this._lastFlowLayoutKey) {
@@ -1467,30 +1466,6 @@ class CompactPowerCard extends CompactPowerCardBase {
   }
 
 
-  _renderPvLabelLines() {
-    const root = this.shadowRoot;
-    if (!root) return;
-    const group = root.getElementById("pv-label-lines");
-    if (!group) return;
-    group.innerHTML = "";
-    const lines = Array.isArray(this._pvLabelLineItems) ? this._pvLabelLineItems : [];
-    const ns = "http://www.w3.org/2000/svg";
-    for (const ln of lines) {
-      const path = document.createElementNS(ns, "path");
-      path.setAttribute("d", ln.d);
-      path.setAttribute("fill", "none");
-      path.setAttribute("stroke", ln.color);
-      path.setAttribute("class", "device-line");
-      path.style.setProperty("--device-line-opacity", String(ln.opacity));
-      path.setAttribute("stroke-width", "3");
-      path.setAttribute("stroke-linecap", "round");
-      path.setAttribute("vector-effect", "non-scaling-stroke");
-      if (ln.glow && ln.glow !== "none") {
-        path.style.filter = ln.glow;
-      }
-      group.appendChild(path);
-    }
-  }
 
   _renderDeviceLines() {
     const root = this.shadowRoot;
@@ -4045,7 +4020,7 @@ class CompactPowerCard extends CompactPowerCardBase {
     // Device: M startX startY V(downY-corner) Q startX downY (startX+dir*corner) downY H homeX
     // Here (inverted): vertical from label up to busY, small round at the PV center level.
     const pvLabelLineItems = [];
-    const busY = sy(-1);                         // bus line Y - 1px lower to run through dot center
+    const busY = sy(-2) + 1;                    // bus line Y = dot center (viewBox units)
     const stubBottomY = busY + 8;                // vertical stub below bus (8px like devices)
     if (this._usePvLabelLines() && pvLabelPositions.length) {
       const allowGlow = this._allowGlowEffects();
@@ -4310,6 +4285,13 @@ class CompactPowerCard extends CompactPowerCardBase {
                 </div>`
               : ""}
 
+            <svg viewBox="0 0 ${baseWidth} ${viewHeight}" preserveAspectRatio="none" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:15;">
+              ${pvLabelLineItems.map(ln => html`
+                <path d="${ln.d}" fill="none" stroke="${ln.color}" stroke-width="2"
+                      stroke-linecap="round" stroke-opacity="${ln.opacity}"
+                      style="${ln.glow !== "none" ? `filter:${ln.glow}` : ""}"></path>
+              `)}
+            </svg>
             <div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(sy(-2)) + (1 / viewHeight) * 100}%; z-index: 20;">
                 <div class="pv-power-dot" style="display: block; width: calc(8px * var(--cpc-scale, 1)); height: calc(8px * var(--cpc-scale, 1)); border-radius: 50%; background: ${pvColor};"></div>
               </div>
