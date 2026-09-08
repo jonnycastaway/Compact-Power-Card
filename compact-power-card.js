@@ -979,6 +979,12 @@ class CompactPowerCard extends CompactPowerCardBase {
         pointer-events: none;
       }
 
+      .pv-power-dot-pulse {
+        animation: cpc-pulse 1.4s ease-in-out infinite;
+        transform-box: fill-box;
+        transform-origin: center;
+      }
+
       .pv-power-dot-wrapper {
         pointer-events: none;
       }
@@ -1499,12 +1505,7 @@ class CompactPowerCard extends CompactPowerCardBase {
       c.setAttribute("cy", String(dot.y));
       c.setAttribute("r", "4");
       c.setAttribute("fill", dot.color || "var(--energy-solar-color)");
-      const a = document.createElementNS(ns, "animate");
-      a.setAttribute("attributeName", "r");
-      a.setAttribute("values", "3.4;4.6;3.4");
-      a.setAttribute("dur", "1.4s");
-      a.setAttribute("repeatCount", "indefinite");
-      c.appendChild(a);
+      c.setAttribute("class", "pv-power-dot-pulse");
       group.appendChild(c);
     }
   }
