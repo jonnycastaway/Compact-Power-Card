@@ -4015,27 +4015,28 @@ class CompactPowerCard extends CompactPowerCardBase {
         };
       });
 
-    // PV label -> PV center lines as overlay divs (same coordinate basis as the visible dot)
+    // PV label -> PV center SVG paths (viewBox coords, curve + glow like device lines)
     const pvLabelLineItems = [];
     if (this._usePvLabelLines() && pvLabelPositions.length) {
-      const busYpct = pctBaseY(pvNodeY - 40);      // same Y as the PV dot
-      const labelCYpct = pctBaseY(pvLabelY);        // label stack center
-      const labelTopYpct = labelCYpct - (24 / viewHeight) * 100; // approx icon top
-      const centerXpct = (pvCenterX / baseWidth) * 100;
+      const allowGlow = this._allowGlowEffects();
+      const busY = pvNodeY - 40;          // same Y as the PV dot
+      const startY = sy(pvLabelY) - 20;   // above the label stack
       pvLabels.slice(0, pvLabelMax).forEach((lbl, idx) => {
         if (!lbl?.entity) return;
         const st = this.hass?.states?.[lbl.entity];
         if (!st) return;
-        const posX = pvLabelPositions[idx]?.x;
-        if (posX == null) return;
+        const startX = pvLabelPositions[idx]?.x;
+        if (startX == null) return;
         const numeric = Math.abs(parseFloat(st.state) || 0);
+        const color = lbl.color || pvColor;
+        const corner = Math.min(6, Math.abs(pvCenterX - startX) / 2);
+        const dirx = pvCenterX >= startX ? 1 : -1;
+        const d = `M${startX} ${startY} V${busY - corner} Q${startX} ${busY} ${startX + dirx * corner} ${busY} H${pvCenterX}`;
         pvLabelLineItems.push({
-          x: (posX / baseWidth) * 100,
-          centerX: centerXpct,
-          yTop: labelTopYpct,
-          yBus: busYpct,
-          color: lbl.color || pvColor,
+          d,
+          color,
           opacity: numeric > 0 ? 1 : 0.4,
+          glow: allowGlow && numeric > 0 ? `drop-shadow(0 0 6px ${color})` : "none",
         });
       });
     }
@@ -4186,7 +4187,14 @@ class CompactPowerCard extends CompactPowerCardBase {
           <circle id="dot-pv-home"      r="4" fill="${pvColor}" opacity="0" />
           <path id="arc-grid-battery" class="flow-line" fill="none" d="${gridBatteryPath}" />
           <g id="device-lines"></g>
-          <g id="pv-label-lines"></g>
+          <g id="pv-label-lines">
+            ${pvLabelLineItems.map(ln => html`
+              <path d="${ln.d}" fill="none" stroke="${ln.color}" stroke-width="3"
+                    stroke-linecap="round" vector-effect="non-scaling-stroke"
+                    stroke-opacity="${ln.opacity}"
+                    style="${ln.glow !== "none" ? `filter:${ln.glow}` : ""}"></path>
+            `)}
+          </g>
 
           <!-- Remaining flow dots -->
           <circle id="dot-pv-grid"      r="4" fill="${pvColor}" opacity="0" />
@@ -4274,14 +4282,6 @@ class CompactPowerCard extends CompactPowerCardBase {
                   </div>
                 </div>`
               : ""}
-            ${pvLabelLineItems.length ? html`
-              <div class="pv-label-lines-overlay" style="position:absolute; inset:0; pointer-events:none; z-index:15;">
-                ${pvLabelLineItems.map(line => html`
-                  <div style="position:absolute; left:${line.x}%; top:${line.yTop}%; width:2px; height:${line.yBus - line.yTop}%; background:${line.color}; opacity:${line.opacity};"></div>
-                  <div style="position:absolute; left:${Math.min(line.x, line.centerX)}%; top:${line.yBus}%; width:${Math.abs(line.x - line.centerX)}%; height:2px; background:${line.color}; opacity:${line.opacity};"></div>
-                `)}
-              </div>
-            ` : ""}
             <div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(pvNodeY - 40)}%; z-index: 20;">
                 <div class="pv-power-dot" style="display: block; width: calc(8px * var(--cpc-scale, 1)); height: calc(8px * var(--cpc-scale, 1)); border-radius: 50%; background: ${pvColor};"></div>
               </div>
