@@ -4046,11 +4046,10 @@ class CompactPowerCard extends CompactPowerCardBase {
     // Device: M startX startY V(downY-corner) Q startX downY (startX+dir*corner) downY H homeX
     // Here (inverted): vertical from label up to busY, small round at the PV center level.
     const pvLabelLineItems = [];
+    const busY = sy(-2);                         // bus line Y (2px from top) - UNCHANGED
+    const stubBottomY = busY + 10;               // vertical stub below bus (10px) - UNCHANGED
     if (this._usePvLabelLines() && pvLabelPositions.length) {
       const allowGlow = this._allowGlowEffects();
-      const busY = sy(-2);                       // bus line Y (2px from top) - UNCHANGED
-      const stubLen = 10;                        // vertical stub below bus - UNCHANGED
-      const stubBottomY = busY + stubLen;
       pvLabels.slice(0, pvLabelMax).forEach((lbl, idx) => {
         if (!lbl?.entity) return;
         const st = this.hass?.states?.[lbl.entity];
