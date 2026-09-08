@@ -673,9 +673,7 @@ class CompactPowerCard extends CompactPowerCardBase {
       .device-line {
         fill: none;
         stroke-linecap: round;
-        stroke-width: 2;
         vector-effect: non-scaling-stroke;
-        stroke-opacity: var(--device-line-opacity, 1);
       }
 
       .device-line-flicker {
