@@ -4041,13 +4041,14 @@ class CompactPowerCard extends CompactPowerCardBase {
         };
       });
 
-    // PV label -> PV center lines (viewBox coords), device-flow style:
-    // label icon -> short vertical -> corner curve -> horizontal to PV center node
+    // PV label -> PV center lines, mirror of the device-line geometry (at top).
+    // Device: M startX startY V(downY-corner) Q startX downY (startX+dir*corner) downY H homeX
+    // Here (inverted): vertical from label up to busY, small round at the PV center level.
     const pvLabelLineItems = [];
     if (this._usePvLabelLines() && pvLabelPositions.length) {
       const allowGlow = this._allowGlowEffects();
-      const joinY = pvNodeY - 26; // bus line safely inside viewBox, just above PV node
-      const startY = sy(pvLabelY) - 12;              // start just above label stack
+      const busY = sy(pvNodeY - 40);          // horizontal runs through dot center (matches dot Y)
+      const startY = sy(pvLabelY);             // line leaves at the label icon row
       pvLabels.slice(0, pvLabelMax).forEach((lbl, idx) => {
         if (!lbl?.entity) return;
         const st = this.hass?.states?.[lbl.entity];
@@ -4057,9 +4058,9 @@ class CompactPowerCard extends CompactPowerCardBase {
         const numeric = Math.abs(parseFloat(st.state) || 0);
         const color = lbl.color || pvColor;
         const horiz = Math.abs(pvCenterX - startX);
-        const corner = Math.min(10, horiz / 2);      // roomy visible curve like device lines
+        const corner = Math.min(4, horiz / 2); // same small corner as device lines
         const dirx = pvCenterX >= startX ? 1 : -1;
-        const d = `M${startX} ${startY} V${joinY - corner} Q${startX + dirx * corner} ${joinY} ${startX + dirx * corner} ${joinY} H${pvCenterX}`;
+        const d = `M${startX} ${startY} V${busY + corner} Q${startX} ${busY} ${startX + dirx * corner} ${busY} H${pvCenterX}`;
         pvLabelLineItems.push({
           d,
           color,
