@@ -980,7 +980,7 @@ class CompactPowerCard extends CompactPowerCardBase {
       }
 
       .pv-power-dot-pulse {
-        animation: cpc-pulse 1.4s ease-in-out infinite;
+        animation: cpc-pulse var(--pv-pulse-duration, 1.4s) ease-in-out infinite;
         transform-box: fill-box;
         transform-origin: center;
       }
@@ -1506,6 +1506,12 @@ class CompactPowerCard extends CompactPowerCardBase {
       c.setAttribute("r", "4");
       c.setAttribute("fill", dot.color || "var(--energy-solar-color)");
       c.setAttribute("class", "pv-power-dot-pulse");
+      // dynamic duration like the home/device dot (faster at higher power)
+      const pvW = Math.abs(this._pvDotWatts || 0);
+      const pulseMin = 0.6, pulseMax = 2.2, pulsePeak = 5000;
+      const t = Math.min(pvW, pulsePeak) / pulsePeak;
+      const secs = pulseMax - (pulseMax - pulseMin) * t;
+      c.style.setProperty("--pv-pulse-duration", secs.toFixed(2) + "s");
       group.appendChild(c);
     }
   }
@@ -4093,6 +4099,7 @@ class CompactPowerCard extends CompactPowerCardBase {
     }
     this._pvLabelPos = pvLabelPositions;
     this._pvLabelLineItems = pvLabelLineItems;
+    this._pvDotWatts = pvNumericW;
     this._pvLabelDot = { x: pvDot.x, y: pvDot.y, color: pvColor };
 
     const batteryDetails =
