@@ -1474,7 +1474,6 @@ class CompactPowerCard extends CompactPowerCardBase {
     if (!group) return;
     group.innerHTML = "";
     const lines = Array.isArray(this._pvLabelLineItems) ? this._pvLabelLineItems : [];
-    if (typeof console !== "undefined" && lines.length) console.log("[cpc] pvLabelLine:", { busY: this._pvBusY, stubBottomY: this._pvStubBottom, lines: lines.map(l => l.d) });
     const ns = "http://www.w3.org/2000/svg";
     for (const ln of lines) {
       const path = document.createElementNS(ns, "path");
@@ -4075,8 +4074,6 @@ class CompactPowerCard extends CompactPowerCardBase {
     }
     this._pvLabelPos = pvLabelPositions;
     this._pvLabelLineItems = pvLabelLineItems;
-    this._pvBusY = busY;
-    this._pvStubBottom = stubBottomY;
 
     const batteryDetails =
       batteryList.length > 1
