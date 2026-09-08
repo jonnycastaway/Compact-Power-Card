@@ -4047,8 +4047,8 @@ class CompactPowerCard extends CompactPowerCardBase {
     const pvLabelLineItems = [];
     if (this._usePvLabelLines() && pvLabelPositions.length) {
       const allowGlow = this._allowGlowEffects();
-      const startY = sy(pvLabelY);             // label icon row
-      const busY = startY - 8;                 // horizontal line just above labels (short vertical, 8px)
+      const startY = sy(pvLabelY) - 16;        // top edge of icon row (icon ~16px tall)
+      const busY = startY - 8;                 // horizontal line 8px above icon top = 8px vertical (same as devices)
       pvLabels.slice(0, pvLabelMax).forEach((lbl, idx) => {
         if (!lbl?.entity) return;
         const st = this.hass?.states?.[lbl.entity];
