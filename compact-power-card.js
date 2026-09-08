@@ -4022,8 +4022,8 @@ class CompactPowerCard extends CompactPowerCardBase {
     if (this._usePvLabelLines() && pvLabelPositions.length) {
       const allowGlow = this._allowGlowEffects();
       // Mirror of device line: device bus is 13px from bottom -> PV bus 13px from top.
-      // sy(v)=v+4; want 13px from top -> v=9 -> busY=sy(9)=13
-      const busY = sy(9);
+      // sy(v)=v+4; want 8px from top -> v=4 -> busY=sy(4)=8
+      const busY = sy(4);
       const busPct = pctBaseY(busY);                // bus line + dot
       const iconTopY = sy(pvLabelY) - 16;           // top edge of label icon stack
       const iconTopPct = pctBaseY(iconTopY);
@@ -4289,7 +4289,7 @@ class CompactPowerCard extends CompactPowerCardBase {
               <div style="position:absolute; left:${Math.min(ln.x, ln.centerX)}%; top:${ln.yBus}%; width:${Math.abs(ln.centerX - ln.x)}%; height:2px; background:${ln.color}; opacity:${ln.opacity}; filter:${ln.glow}; pointer-events:none;"></div>
               <div style="position:absolute; left:${ln.x}%; top:${ln.yTop}%; width:2px; height:${ln.yBus - ln.yTop}%; background:${ln.color}; opacity:${ln.opacity}; filter:${ln.glow}; pointer-events:none;"></div>
             `)}
-            <div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(sy(9))}%; z-index: 20;">
+            <div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(sy(4))}%; z-index: 20;">
                 <div class="pv-power-dot" style="display: block; width: calc(8px * var(--cpc-scale, 1)); height: calc(8px * var(--cpc-scale, 1)); border-radius: 50%; background: ${pvColor};"></div>
               </div>
             ${pvInBatterySlot
