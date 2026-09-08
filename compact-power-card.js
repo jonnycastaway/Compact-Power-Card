@@ -1558,12 +1558,12 @@ class CompactPowerCard extends CompactPowerCardBase {
         `device-line${flicker ? " device-line-flicker" : ""}`
       );
       path.style.setProperty("--device-line-opacity", String(ln.opacity ?? 1));
+      path.setAttribute("stroke-opacity", String(ln.opacity ?? 1));
       path.setAttribute("stroke-width", "3");
       path.setAttribute("stroke-linecap", "round");
       path.setAttribute("vector-effect", "non-scaling-stroke");
-      if (ln.dashed && !flicker) {
-        path.setAttribute("stroke-dasharray", "1 3");
-      } else if (this._allowGlowEffects()) {
+      // Inactive lines: solid but dimmed (no dash-dot pattern), glow only when active
+      if (!ln.dashed && !flicker && this._allowGlowEffects()) {
         path.style.filter = `drop-shadow(0 0 6px ${ln.color})`;
       }
       group.appendChild(path);
@@ -3833,7 +3833,7 @@ class CompactPowerCard extends CompactPowerCardBase {
         const upY = startY + 4;
         const color = homeColor;
         const dashed = !active;
-        const opacity = dashed ? 0.1 : 1;
+        const opacity = dashed ? 0.15 : 1;
         return {
           key: src.key || src.entity || `idx-${idx}`,
           active,
