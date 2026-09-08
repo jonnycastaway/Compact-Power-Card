@@ -4020,8 +4020,11 @@ class CompactPowerCard extends CompactPowerCardBase {
     // Device: M startX startY V(downY-corner) Q startX downY (startX+dir*corner) downY H homeX
     // Here (inverted): vertical from label up to busY, small round at the PV center level.
     const pvLabelLineItems = [];
-    const busY = sy(-2) + 1;                    // bus line Y = dot center (viewBox units)
-    const stubBottomY = busY + 8;                // vertical stub below bus (8px like devices)
+    const dotCenterPct = pctBaseY(sy(-2)) + (1 / viewHeight) * 100;  // exact dot center % (same as dot top)
+    const pxToPct = (px) => (px / viewHeight) * 100;
+    const busPct = dotCenterPct;                 // horizontal line at dot center
+    const stubBottomPct = busPct + pxToPct(8);   // vertical stub 8px below bus
+    const centerXpct = (pvCenterX / baseWidth) * 100;
     if (this._usePvLabelLines() && pvLabelPositions.length) {
       const allowGlow = this._allowGlowEffects();
       pvLabels.slice(0, pvLabelMax).forEach((lbl, idx) => {
@@ -4032,18 +4035,15 @@ class CompactPowerCard extends CompactPowerCardBase {
         if (startX == null) return;
         const numeric = Math.abs(parseFloat(st.state) || 0);
         const color = lbl.color || pvColor;
-        const horiz = Math.abs(pvCenterX - startX);
-        const corner = Math.min(4, horiz / 2);   // tighter bend, same radius as device lines
-        const dirx = pvCenterX >= startX ? 1 : -1;
-        // Exact device-line geometry (mirrored): stub up to busY, Q-curve at the junction, horizontal to center
-        const d = `M${startX} ${stubBottomY} V${busY + corner} ` +
-                  `Q${startX} ${busY} ${startX + dirx * corner} ${busY} ` +
-                  `H${pvCenterX}`;
+        const xPct = (startX / baseWidth) * 100;
         pvLabelLineItems.push({
-          d,
+          x: xPct,
+          centerX: centerXpct,
+          yBus: busPct,
+          yBottom: stubBottomPct,
           color,
-          opacity: numeric > 0 ? 1 : 0.4,
           glow: allowGlow && numeric > 0 ? `drop-shadow(0 0 6px ${color})` : "none",
+          opacity: numeric > 0 ? 1 : 0.4,
         });
       });
     }
@@ -4285,13 +4285,10 @@ class CompactPowerCard extends CompactPowerCardBase {
                 </div>`
               : ""}
 
-            <svg viewBox="0 0 ${baseWidth} ${viewHeight}" preserveAspectRatio="none" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:15;">
-              ${pvLabelLineItems.map(ln => html`
-                <path d="${ln.d}" fill="none" stroke="${ln.color}" stroke-width="2"
-                      stroke-linecap="round" stroke-opacity="${ln.opacity}"
-                      style="${ln.glow !== "none" ? `filter:${ln.glow}` : ""}"></path>
-              `)}
-            </svg>
+            ${pvLabelLineItems.map(ln => html`
+              <div style="position:absolute; left:${Math.min(ln.x, ln.centerX)}%; top:${ln.yBus}%; width:${Math.abs(ln.centerX - ln.x)}%; height:2px; background:${ln.color}; opacity:${ln.opacity}; filter:${ln.glow}; pointer-events:none;"></div>
+              <div style="position:absolute; left:${ln.x}%; top:${ln.yBus}%; width:2px; height:${ln.yBottom - ln.yBus}%; background:${ln.color}; opacity:${ln.opacity}; filter:${ln.glow}; pointer-events:none; border-radius:0 0 3px 3px;"></div>
+            `)}
             <div class="overlay-item pv-power-dot-wrapper" style="left:${(pvCenterX/baseWidth)*100}%; top:${pctBaseY(sy(-2)) + (1 / viewHeight) * 100}%; z-index: 20;">
                 <div class="pv-power-dot" style="display: block; width: calc(8px * var(--cpc-scale, 1)); height: calc(8px * var(--cpc-scale, 1)); border-radius: 50%; background: ${pvColor};"></div>
               </div>
