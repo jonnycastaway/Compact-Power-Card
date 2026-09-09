@@ -1058,7 +1058,7 @@ class CompactPowerCard extends CompactPowerCardBase {
       }
 
       .pv-label-marker .aux-sub-label.label-name {
-        margin-top: 1px;
+        margin-top: 0px;
         font-weight: 400;
         line-height: 1;
       }
