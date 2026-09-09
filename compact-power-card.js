@@ -1466,15 +1466,6 @@ class CompactPowerCard extends CompactPowerCardBase {
       .replace("{secondary}", secondary);
   }
 
-  _formatSecondary(lbl) {
-    const st = this._hass?.states?.[lbl.secondary_entity];
-    if (!st) return "";
-    const val = parseFloat(st.state);
-    if (!Number.isFinite(val)) return "";
-    const decimals = lbl.decimal_places != null ? lbl.decimal_places : 0;
-    return val.toFixed(decimals) + "%";
-  }
-
 
 
   _renderPvLabelLines() {
@@ -4277,11 +4268,15 @@ class CompactPowerCard extends CompactPowerCardBase {
               (lbl) => html`<div class="overlay-item pv-label-marker" data-index="${pvLabelItems.indexOf(lbl)}" style="left:${lbl.leftPct}%; top:${lbl.topPct}%;">
                 <div class="aux-marker pv-label-marker clickable" @click=${() => this._openMoreInfo(lbl.entity || null)}>
                 <ha-icon icon="${lbl.icon}" style="gap: 0px; color:${lbl.color}; opacity:1; --mdc-icon-size: calc(18px * var(--cpc-scale, 1)); filter:${allowGlow && lbl.numeric !== 0 ? `drop-shadow(0 0 8px ${lbl.color})` : "none"};"></ha-icon>
-                  <div class="aux-label" style="margin-top: -6px; padding-bottom: 0px; color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity};">
-                    ${lbl.secondary_entity && this._hass?.states?.[lbl.secondary_entity]
-                      ? html`${this._formatSecondary(lbl)}`
-                      : renderValue(lbl.val)}
-                  </div>
+                  <div class="aux-label" style="margin-top: -6px; padding-bottom: 0px; color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity};">${renderValue(lbl.val)}</div>
+                  ${lbl.secondary_entity && this._hass?.states?.[lbl.secondary_entity] && (() => {
+                    const secState = this._hass.states[lbl.secondary_entity];
+                    const secVal = parseFloat(secState?.state) || 0;
+                    const primState = this._hass.states[lbl.entity];
+                    const primVal = parseFloat(primState?.state) || 0;
+                    const fmt = lbl.format || "{primary} W ({secondary}%)";
+                    return html`<div class="aux-sub-label label-secondary" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); ">${this._formatLabelValue(primVal, secVal, fmt)}</div>`;
+                  })()}
                   ${showPvLabelNames && lbl.name
                     ? html`<div class="aux-sub-label label-name" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); ">${lbl.name}</div>`
                     : ""}
