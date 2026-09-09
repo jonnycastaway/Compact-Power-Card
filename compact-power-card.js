@@ -1058,7 +1058,7 @@ class CompactPowerCard extends CompactPowerCardBase {
       }
 
       .pv-label-marker .aux-sub-label.label-name {
-        margin-top: 0px;
+        margin-top: -1px;
         font-weight: 400;
         line-height: 1;
       }
@@ -4279,7 +4279,7 @@ class CompactPowerCard extends CompactPowerCardBase {
                   ${showPvLabelNames && lbl.name
                     ? html`<div class="aux-sub-label label-name" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); ">${lbl.name}</div>`
                     : ""}
-                <ha-icon icon="${lbl.icon}" style="display:block; line-height:0; color:${lbl.color}; opacity:1; --mdc-icon-size: calc(18px * var(--cpc-scale, 1)); filter:${allowGlow && lbl.numeric !== 0 ? `drop-shadow(0 0 8px ${lbl.color})` : "none"};"></ha-icon>
+                <ha-icon icon="${lbl.icon}" style="display:block; line-height:0; margin-top:1px; color:${lbl.color}; opacity:1; --mdc-icon-size: calc(18px * var(--cpc-scale, 1)); filter:${allowGlow && lbl.numeric !== 0 ? `drop-shadow(0 0 8px ${lbl.color})` : "none"};"></ha-icon>
                   <div class="aux-label" style="margin-top: 2px; padding-top: 0px; padding-bottom: 0px; color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity};">${renderValue(lbl.val)}</div>
                   ${lbl.secondary_entity && this._hass?.states?.[lbl.secondary_entity] && (() => {
                     return html`<div class="aux-sub-label label-secondary" style="color:${lbl.color}; opacity:${lbl.hidden ? 0.35 : lbl.opacity}; font-size:calc(10px * var(--cpc-scale, 1) * var(--cpc-text-scale, 1)); ">${this._formatSecondaryOnly(lbl)}</div>`;
